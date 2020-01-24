@@ -12,6 +12,7 @@ public class AndroidLauncher extends AndroidApplication {
 		super.onCreate(savedInstanceState);
 //		setContentView(R.layout.launcher_activity);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
+
 		initialize(new MyGdxPractice(), config);
 	}
 }

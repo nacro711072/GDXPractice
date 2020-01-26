@@ -11,13 +11,22 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TideMapLoader;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -29,7 +38,9 @@ import com.badlogic.gdx.scenes.scene2d.actions.RepeatAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.practice.component.Arrow;
@@ -45,6 +56,9 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 
 	private TiledMap map;
 	private TiledMapRenderer mapRender;
+
+	private World world;
+	private Box2DDebugRenderer box2dRender;
 	private static final int width = 1000;
 	private static final int height = 500;
 
@@ -53,8 +67,9 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 		test = new Texture("lady_beetle.png");
 		arror = new Arrow("arrow.png");
 		camera = new OrthographicCamera(width, height);
-//		fixCamera = new OrthographicCamera(width, height);
-//		batch = new SpriteBatch();
+		world = new World(new Vector2(0, 0), true);
+		box2dRender = new Box2DDebugRenderer();
+
 
 		arror.setCameraViewport(width, height);
 		arror.addOnTouchListener(new Arrow.OnTouchListener() {
@@ -65,6 +80,11 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 
 			@Override
 			public void onTouchLeft(int pointer) {
+
+				if (camera.position.x < 10f) {
+					camera.position.x = 0;
+					return;
+				}
 				camera.translate(-10, 0, 0);
 			}
 		});
@@ -73,15 +93,31 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 
 		mapRender = new OrthogonalTiledMapRenderer(map);
 
+		System.out.println(String.format("map object size: %d", map.getLayers().get(2).getObjects().getByType(RectangleMapObject.class).size));
+
+		RectangleMapObject mapObject = map.getLayers().get(2).getObjects().getByType(RectangleMapObject.class).get(0);
+		Rectangle rect = mapObject.getRectangle();
 		Image image = new Image(test);
-		image.addAction(Actions.moveTo(width / 2, height / 2));
-		Viewport viewport = new FitViewport(1000, 500, camera);
+		image.addAction(Actions.moveTo(rect.getX() + image.getWidth(), rect.getY() + rect.height));
+		Viewport viewport = new ScalingViewport(Scaling.fill, 1000, 500, camera);
 		stage = new Stage(viewport);
 		stage.addActor(image);
 //		camera.position.set()
 
-		InputMultiplexer inputMultiplexer = new InputMultiplexer(this, stage, arror);
+		InputMultiplexer inputMultiplexer = new InputMultiplexer(this, stage);
         Gdx.input.setInputProcessor(inputMultiplexer);
+
+		BodyDef bdef = new BodyDef();
+		bdef.type = BodyDef.BodyType.StaticBody;
+		bdef.position.set(rect.getX() + rect.getWidth() / 2, rect.getY() + rect.getHeight() / 2);
+
+		Body body = world.createBody(bdef);
+		FixtureDef fixtureDef = new FixtureDef();
+		PolygonShape shape = new PolygonShape();
+		shape.setAsBox(rect.getWidth() / 2, rect.getHeight() / 2);
+		fixtureDef.shape = shape;
+		body.createFixture(fixtureDef);
+
 	}
 
 	@Override
@@ -95,33 +131,7 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 
 		arror.render();
 
-//		batch.begin();
-
-//		TextureRegion a = new TextureRegion(img, 80, 80);
-
-//		batch.draw(a, 0, 0);
-//		batch.draw(arror,
-//				-width / 2 + arror.getWidth() + 24, -height / 2, // 圖片左下角的點
-//                0, 0, // 操作的中心點???
-//                arror.getWidth(), arror.getHeight(), // 渲染出來的寬高
-//                1f, 1f,
-//                0f,  // 逆時針旋轉 角度
-//                0, 0,  // 操作目標的起始點
-//                arror.getWidth(), arror.getHeight(), // 操作目標的寬高
-//                false, false);
-//
-//		batch.draw(arror,
-//				-width / 2 + arror.getWidth() + 12, -height / 2, // 圖片左下角的點
-//				0, arror.getHeight() / 2, // 操作的中心點???
-//				arror.getWidth(), arror.getHeight(), // 渲染出來的寬高
-//				1f, 1f,
-//				180f,  // 逆時針旋轉 角度
-//				0, 0,  // 操作目標的起始點
-//				arror.getWidth(), arror.getHeight(), // 操作目標的寬高
-//				false, false);
-//
-//
-//		batch.end();
+		box2dRender.render(world, camera.combined);
 
 		stage.act();
 		stage.draw();
@@ -156,22 +166,6 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-//		float x = -width / 2 + arror.getWidth() + 24;
-//		float y = -height / 2;
-//		Rectangle rectangle = new Rectangle(x, y, arror.getWidth(), arror.getHeight());
-//		Vector3 vec = new Vector3(screenX, screenY, 0);
-////		Vector3 size = camera.project(new Vector3(arror.getWidth(), arror.getHeight(), 0));
-//		fixCamera.unproject(vec);
-//		System.out.println(String.format("vec: x1->%f, y1->%f", vec.x, vec.y));
-//		if (rectangle.contains(vec.x, vec.y)) {
-//			Gdx.app.log("test", "contains arrow");
-//			Actor test = stage.getActors().first();
-////			test.moveBy(10, 0);
-//			camera.translate(10, 0);
-//		}
-//
-//		System.out.println(String.format("rectangle: x1->%f, y1->%f, x2->%f, y2->%f", rectangle.x, rectangle.y, rectangle.x + rectangle.width, rectangle.y + rectangle.height));
-//		System.out.println(String.format("touchDown: x->%d, y->%d, p->%d, b->%d", screenX, screenY, pointer, button));
 		return false;
 	}
 

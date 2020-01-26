@@ -155,6 +155,10 @@ public class Arrow extends Texture implements InputProcessor {
 
 
         batch.end();
+
+        if (Gdx.input.isTouched()) {
+            touchDown(Gdx.app.getInput().getX(), Gdx.app.getInput().getY(), 0, 0);
+        }
     }
 
     public void addOnTouchListener(OnTouchListener listener) {

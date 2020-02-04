@@ -45,12 +45,13 @@ import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.practice.component.Arrow;
+import com.mygdx.practice.component.UserController;
 
 public class MyGdxPractice extends ApplicationAdapter implements InputProcessor {
 //	private SpriteBatch batch;
 //	private Texture img;
 	private Texture test;
-	private Arrow arror;
+	private UserController arror;
 	private OrthographicCamera camera;
 //	private OrthographicCamera fixCamera;
 	private Stage stage;
@@ -67,13 +68,13 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 	@Override
 	public void create () {
 		test = new Texture("lady_beetle.png");
-		arror = new Arrow("arrow.png");
+		arror = new UserController("arrow.png", "up.png");
 		camera = new OrthographicCamera(width, height);
 		world = new World(new Vector2(0, -9.8f), true);
 		box2dRender = new Box2DDebugRenderer();
 
 		arror.setCameraViewport(width, height);
-		arror.addOnTouchListener(new Arrow.OnTouchListener() {
+		arror.addOnTouchListener(new UserController.OnTouchListener() {
 			@Override
 			public void onTouchRight(int pointer) {
 
@@ -151,7 +152,7 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 		image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
 //		image.setPosition();
 
-		arror.addOnTouchListener(new Arrow.OnTouchListener() {
+		arror.addOnTouchListener(new UserController.OnTouchListener() {
 			@Override
 			public void onTouchRight(int pointer) {
 				mainBody.applyLinearImpulse(new Vector2(0.5f, 0), mainBody.getWorldCenter(), true);

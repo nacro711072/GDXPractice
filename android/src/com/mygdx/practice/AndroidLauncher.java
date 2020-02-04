@@ -1,6 +1,7 @@
 package com.mygdx.practice;
 
 import android.os.Bundle;
+import android.os.Handler;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
@@ -11,8 +12,10 @@ public class AndroidLauncher extends AndroidApplication {
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 //		setContentView(R.layout.launcher_activity);
-		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 
+		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		initialize(new MyGdxPractice(), config);
 	}
+
+
 }

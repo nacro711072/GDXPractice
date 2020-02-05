@@ -26,7 +26,12 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.MassData;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -47,7 +52,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.practice.component.Arrow;
 import com.mygdx.practice.component.UserController;
 
-public class MyGdxPractice extends ApplicationAdapter implements InputProcessor {
+public class MyGdxPractice extends ApplicationAdapter {
 //	private SpriteBatch batch;
 //	private Texture img;
 	private Texture test;
@@ -114,7 +119,7 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 		stage.addActor(image);
 //		camera.position.set()
 
-		InputMultiplexer inputMultiplexer = new InputMultiplexer(this, stage);
+		InputMultiplexer inputMultiplexer = new InputMultiplexer(stage, arror);
         Gdx.input.setInputProcessor(inputMultiplexer);
 
 		BodyDef bdef = new BodyDef();
@@ -153,6 +158,7 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 		CircleShape shape1 = new CircleShape();
 		shape1.setRadius(16);
 		fixtureDef.shape = shape1;
+		fixtureDef.friction = 0.4f;
 		mainBody.createFixture(fixtureDef);
 		image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
 //		image.setPosition();
@@ -160,22 +166,28 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 		arror.addOnTouchListener(new UserController.OnTouchListener() {
 			@Override
 			public void onTouchRight(int pointer) {
-				mainBody.applyLinearImpulse(new Vector2(0.5f, 0), mainBody.getWorldCenter(), true);
+				if (Math.abs(mainBody.getLinearVelocity().x) < 32) {
+					mainBody.applyLinearImpulse(new Vector2(4f, 0), mainBody.getWorldCenter(), true);
+				}
 //				image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
 //				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
 				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
+				System.out.println(String.format("v: %s", mainBody.getLinearVelocity()));
 			}
 
 			@Override
 			public void onTouchLeft(int pointer) {
-				mainBody.applyLinearImpulse(new Vector2(-0.5f, 0), mainBody.getWorldCenter(), true);
+				if (Math.abs(mainBody.getLinearVelocity().x) < 32) {
+					mainBody.applyLinearImpulse(new Vector2(-4f, 0), mainBody.getWorldCenter(), true);
+				}
+
 				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
 //				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
 			}
 
             @Override
             public void onJump(int pointer) {
-                mainBody.applyLinearImpulse(new Vector2(0, 5f), mainBody.getWorldCenter(), true);
+                mainBody.applyLinearImpulse(new Vector2(0, 32f), mainBody.getWorldCenter(), true);
             }
         });
 	}
@@ -186,7 +198,7 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 //		batch.setProjectionMatrix(fixCamera.combined);
-		world.step(1 / 60f, 6, 2);
+		world.step(1 / 10f, 6, 2);
 		mapRender.setView(camera);
 		mapRender.render();
 
@@ -201,54 +213,12 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 	}
 	
 	@Override
-	public void dispose () {
+	public void dispose() {
 //		batch.dispose();
 		arror.dispose();
 //		img.dispose();
 		test.dispose();
 		stage.dispose();
 		map.dispose();
-	}
-
-	@Override
-	public boolean keyDown(int keycode) {
-		System.out.println(String.format("keyDown: %d", keycode));
-		return false;
-	}
-
-	@Override
-	public boolean keyUp(int keycode) {
-		System.out.println(String.format("keyUp: %d", keycode));
-		return false;
-	}
-
-	@Override
-	public boolean keyTyped(char character) {
-		return false;
-	}
-
-	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		return false;
-	}
-
-	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		return false;
-	}
-
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		return false;
-	}
-
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
-		return false;
-	}
-
-	@Override
-	public boolean scrolled(int amount) {
-		return false;
 	}
 }

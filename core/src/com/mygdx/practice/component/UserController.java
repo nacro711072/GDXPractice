@@ -1,6 +1,7 @@
 package com.mygdx.practice.component;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * Nick, 2020-02-04
  */
-public final class UserController implements Disposable {
+public final class UserController implements Disposable, InputProcessor {
     private Texture mLeftAndRight;
     private Texture mJump;
 
@@ -32,13 +33,29 @@ public final class UserController implements Disposable {
         mJump = new Texture(pathOfJump);
 
         float x = -fixCamera.viewportWidth / 2 + mLeftAndRight.getWidth() + 24;
-        float y = -fixCamera.viewportHeight / 2;
+        float y = -fixCamera.viewportHeight / 2 + 12;
         rectangleRight = new Rectangle(x, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
         rectangleLeft = new Rectangle(x - mLeftAndRight.getWidth() - 12, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
         rectangleJump = new Rectangle(fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 12, mJump.getWidth(), mJump.getHeight());
     }
 
-    private void touchDown(int screenX, int screenY, int pointer, int button) {
+    @Override
+    public boolean keyDown(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector3 vec = new Vector3(screenX, screenY, 0);
         fixCamera.unproject(vec);
         if (rectangleRight.contains(vec.x, vec.y)) {
@@ -54,7 +71,27 @@ public final class UserController implements Disposable {
                 listener.onJump(pointer);
             }
         }
+        return false;
+    }
 
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        return false;
     }
 
     public void render() {
@@ -107,7 +144,7 @@ public final class UserController implements Disposable {
     public void setCameraViewport(float width, float height) {
         fixCamera = new OrthographicCamera(width, height);
         float x = -fixCamera.viewportWidth / 2 + mLeftAndRight.getWidth() + 24;
-        float y = -fixCamera.viewportHeight / 2;
+        float y = -fixCamera.viewportHeight / 2 + 12;
         rectangleRight = new Rectangle(x, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
         rectangleLeft = new Rectangle(x - mLeftAndRight.getWidth() - 12, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
         rectangleJump = new Rectangle(fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 12, mJump.getWidth(), mJump.getHeight());

@@ -92,7 +92,12 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 				}
 				camera.translate(-2, 0, 0);
 			}
-		});
+
+            @Override
+            public void onJump(int pointer) {
+
+            }
+        });
 		TmxMapLoader mapLoader = new TmxMapLoader();
 		map = mapLoader.load("map/test.tmx");
 
@@ -167,7 +172,12 @@ public class MyGdxPractice extends ApplicationAdapter implements InputProcessor 
 				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
 //				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
 			}
-		});
+
+            @Override
+            public void onJump(int pointer) {
+                mainBody.applyLinearImpulse(new Vector2(0, 5f), mainBody.getWorldCenter(), true);
+            }
+        });
 	}
 
 	@Override

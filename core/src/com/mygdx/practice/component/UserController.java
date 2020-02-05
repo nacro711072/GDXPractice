@@ -20,6 +20,7 @@ public final class UserController implements Disposable {
 
     private Rectangle rectangleRight;
     private Rectangle rectangleLeft;
+    private Rectangle rectangleJump;
 
     private OrthographicCamera fixCamera = new OrthographicCamera();
     private SpriteBatch batch = new SpriteBatch();
@@ -34,6 +35,7 @@ public final class UserController implements Disposable {
         float y = -fixCamera.viewportHeight / 2;
         rectangleRight = new Rectangle(x, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
         rectangleLeft = new Rectangle(x - mLeftAndRight.getWidth() - 12, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
+        rectangleJump = new Rectangle(fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 12, mJump.getWidth(), mJump.getHeight());
     }
 
     private void touchDown(int screenX, int screenY, int pointer, int button) {
@@ -46,6 +48,10 @@ public final class UserController implements Disposable {
         } else if (rectangleLeft.contains(vec.x, vec.y)) {
             for (OnTouchListener listener: touchListeners) {
                 listener.onTouchLeft(pointer);
+            }
+        } else if (rectangleJump.contains(vec.x, vec.y)) {
+            for (OnTouchListener listener: touchListeners) {
+                listener.onJump(pointer);
             }
         }
 
@@ -104,8 +110,7 @@ public final class UserController implements Disposable {
         float y = -fixCamera.viewportHeight / 2;
         rectangleRight = new Rectangle(x, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
         rectangleLeft = new Rectangle(x - mLeftAndRight.getWidth() - 12, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
-//        fixCamera.viewportWidth = width;
-//        fixCamera.viewportHeight = height;
+        rectangleJump = new Rectangle(fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 12, mJump.getWidth(), mJump.getHeight());
     }
 
 

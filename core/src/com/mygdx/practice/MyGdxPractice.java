@@ -51,6 +51,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.practice.component.Arrow;
 import com.mygdx.practice.component.UserController;
+import com.mygdx.practice.model.Mario;
 
 public class MyGdxPractice extends ApplicationAdapter {
 //	private SpriteBatch batch;
@@ -141,6 +142,7 @@ public class MyGdxPractice extends ApplicationAdapter {
 
 			body = world.createBody(bdef);
 			fixtureDef = new FixtureDef();
+			fixtureDef.friction = 0f;
 			shape = new PolygonShape();
 			shape.setAsBox(rect.getWidth() / 2, rect.getHeight() / 2);
 			fixtureDef.shape = shape;
@@ -157,6 +159,7 @@ public class MyGdxPractice extends ApplicationAdapter {
 		fixtureDef = new FixtureDef();
 		CircleShape shape1 = new CircleShape();
 		shape1.setRadius(16);
+		fixtureDef.density = 0.001f;
 		fixtureDef.shape = shape1;
 		fixtureDef.friction = 0.4f;
 		mainBody.createFixture(fixtureDef);
@@ -167,7 +170,11 @@ public class MyGdxPractice extends ApplicationAdapter {
 			@Override
 			public void onTouchRight(int pointer) {
 				if (Math.abs(mainBody.getLinearVelocity().x) < 32) {
-					mainBody.applyLinearImpulse(new Vector2(4f, 0), mainBody.getWorldCenter(), true);
+					if (mainBody.getLinearVelocity().y != 0) {
+//						mainBody.applyLinearImpulse(new Vector2(4f, mainBody.getLinearVelocity().y), mainBody.getWorldCenter(), true);
+					} else {
+						mainBody.applyLinearImpulse(new Vector2(4f, 0), mainBody.getWorldCenter(), true);
+					}
 				}
 //				image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
 //				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
@@ -178,16 +185,24 @@ public class MyGdxPractice extends ApplicationAdapter {
 			@Override
 			public void onTouchLeft(int pointer) {
 				if (Math.abs(mainBody.getLinearVelocity().x) < 32) {
-					mainBody.applyLinearImpulse(new Vector2(-4f, 0), mainBody.getWorldCenter(), true);
+					if (mainBody.getLinearVelocity().y != 0) {
+//						mainBody.applyLinearImpulse(new Vector2(-4f, mainBody.getLinearVelocity().y), mainBody.getWorldCenter(), true);
+					} else {
+						mainBody.applyLinearImpulse(new Vector2(-4f, 0), mainBody.getWorldCenter(), true);
+					}
 				}
 
-				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
+//				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
 //				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
 			}
 
             @Override
             public void onJump(int pointer) {
-                mainBody.applyLinearImpulse(new Vector2(0, 32f), mainBody.getWorldCenter(), true);
+				if (mainBody.getLinearVelocity().x != 0) {
+					Vector2 v = mainBody.getLinearVelocity().add(0, 32f);
+					mainBody.applyLinearImpulse(v, mainBody.getWorldCenter(), true);
+//	                mainBody.applyLinearImpulse(new Vector2(0, 20000f), mainBody.getWorldCenter(), true);
+				}
             }
         });
 	}
@@ -198,7 +213,7 @@ public class MyGdxPractice extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 //		batch.setProjectionMatrix(fixCamera.combined);
-		world.step(1 / 10f, 6, 2);
+		world.step(1 / 10f, 8, 3);
 		mapRender.setView(camera);
 		mapRender.render();
 

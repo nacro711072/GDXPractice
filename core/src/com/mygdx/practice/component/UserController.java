@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.practice.model.PressModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,10 @@ public final class UserController implements Disposable, InputProcessor {
     private Rectangle rectangleRight;
     private Rectangle rectangleLeft;
     private Rectangle rectangleJump;
+
+    private PressModel isLeftPress = new PressModel();
+    private PressModel isRightPress = new PressModel();
+    private PressModel isJumpPress = new PressModel();
 
     private OrthographicCamera fixCamera = new OrthographicCamera();
     private SpriteBatch batch = new SpriteBatch();
@@ -58,24 +63,61 @@ public final class UserController implements Disposable, InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector3 vec = new Vector3(screenX, screenY, 0);
         fixCamera.unproject(vec);
+        Gdx.app.log("controller", String.format("down, p: %s", pointer));
         if (rectangleRight.contains(vec.x, vec.y)) {
-            for (OnTouchListener listener: touchListeners) {
-                listener.onTouchRight(pointer);
-            }
+            isRightPress.isPress = true;
+            isRightPress.pointer = pointer;
         } else if (rectangleLeft.contains(vec.x, vec.y)) {
-            for (OnTouchListener listener: touchListeners) {
-                listener.onTouchLeft(pointer);
-            }
+            isLeftPress.isPress = true;
+            isLeftPress.pointer = pointer;
         } else if (rectangleJump.contains(vec.x, vec.y)) {
-            for (OnTouchListener listener: touchListeners) {
-                listener.onJump(pointer);
-            }
+            isJumpPress.isPress = true;
+            isJumpPress.pointer = pointer;
         }
+
+//        for (OnTouchListener listener: touchListeners) {
+//            if (isRightPress) {
+//                listener.onTouchRight(pointer);
+//            }
+//            if (isLeftPress) {
+//                listener.onTouchLeft(pointer);
+//            }
+//            if (isJumpPress) {
+//                listener.onJump(pointer);
+//            }
+//        }
+
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+//        Vector3 vec = new Vector3(screenX, screenY, 0);
+//        fixCamera.unproject(vec);
+        Gdx.app.log("controller", String.format("up, p: %s", pointer));
+        if (isRightPress.pointer == pointer) {
+            isRightPress.isPress = false;
+            isRightPress.pointer = -1;
+        } else if (isLeftPress.pointer == pointer) {
+            isLeftPress.isPress = false;
+            isLeftPress.pointer = -1;
+        } else if (isJumpPress.pointer == pointer) {
+            isJumpPress.isPress = false;
+            isJumpPress.pointer = -1;
+        }
+
+//        for (OnTouchListener listener: touchListeners) {
+//            if (isRightPress) {
+//                listener.onTouchRight(pointer);
+//            }
+//            if (isLeftPress) {
+//                listener.onTouchLeft(pointer);
+//            }
+//            if (isJumpPress) {
+//                listener.onJump(pointer);
+//            }
+//        }
+
         return false;
     }
 
@@ -132,9 +174,23 @@ public final class UserController implements Disposable, InputProcessor {
 
         batch.end();
 
-        if (Gdx.input.isTouched()) {
-            touchDown(Gdx.app.getInput().getX(), Gdx.app.getInput().getY(), 0, 0);
+        for (OnTouchListener listener: touchListeners) {
+            if (isRightPress.isPress) {
+                listener.onTouchRight(1);
+            }
+            if (isLeftPress.isPress) {
+                listener.onTouchLeft(1);
+            }
+            if (isJumpPress.isPress) {
+                listener.onJump(1);
+            }
         }
+
+//        for (int i = 0; i < 20; ++i) { // AndroidInput.NUM_TOUCHES = 20
+//            if (Gdx.input.isTouched()) {
+//                touchDown(Gdx.app.getInput().getX(), Gdx.app.getInput().getY(), 0, i);
+//            }
+//        }
     }
 
     public void addOnTouchListener(OnTouchListener listener) {

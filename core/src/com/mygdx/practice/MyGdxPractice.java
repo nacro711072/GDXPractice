@@ -68,15 +68,16 @@ public class MyGdxPractice extends ApplicationAdapter {
 	private World world;
 	private Box2DDebugRenderer box2dRender;
 	private Body mainBody;
-	private static final int width = 1000;
+	private static final int width = 800;
 	private static final int height = 500;
+	private int i = 0;
 
 	@Override
 	public void create () {
 		test = new Texture("lady_beetle.png");
 		arror = new UserController("arrow.png", "up.png");
 		camera = new OrthographicCamera(width, height);
-		world = new World(new Vector2(0, -9.8f), true);
+		world = new World(new Vector2(0, -4.9f), true);
 		box2dRender = new Box2DDebugRenderer();
 
 		arror.setCameraViewport(width, height);
@@ -159,9 +160,8 @@ public class MyGdxPractice extends ApplicationAdapter {
 		fixtureDef = new FixtureDef();
 		CircleShape shape1 = new CircleShape();
 		shape1.setRadius(16);
-		fixtureDef.density = 0.001f;
 		fixtureDef.shape = shape1;
-		fixtureDef.friction = 0.4f;
+		fixtureDef.friction = 0f;
 		mainBody.createFixture(fixtureDef);
 		image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
 //		image.setPosition();
@@ -178,8 +178,8 @@ public class MyGdxPractice extends ApplicationAdapter {
 				}
 //				image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
 //				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
-				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
-				System.out.println(String.format("v: %s", mainBody.getLinearVelocity()));
+//				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
+//				System.out.println(String.format("v: %s", mainBody.getLinearVelocity()));
 			}
 
 			@Override
@@ -198,8 +198,9 @@ public class MyGdxPractice extends ApplicationAdapter {
 
             @Override
             public void onJump(int pointer) {
-				if (mainBody.getLinearVelocity().x != 0) {
-					Vector2 v = mainBody.getLinearVelocity().add(0, 32f);
+				if (mainBody.getLinearVelocity().y == 0) {
+					Vector2 v = mainBody.getLinearVelocity();
+					v.y = 64f;
 					mainBody.applyLinearImpulse(v, mainBody.getWorldCenter(), true);
 //	                mainBody.applyLinearImpulse(new Vector2(0, 20000f), mainBody.getWorldCenter(), true);
 				}
@@ -225,6 +226,15 @@ public class MyGdxPractice extends ApplicationAdapter {
 		stage.draw();
 		Actor mainAct = stage.getActors().get(0);
 		mainAct.addAction(Actions.moveTo(mainBody.getPosition().x - mainAct.getWidth() / 2, mainBody.getPosition().y - mainAct.getHeight() / 2));
+
+		if (++i % 10 == 0) {
+			Gdx.app.log("render", String.format("mainBody speed -> x:%s, y:%s", mainBody.getLinearVelocity().x, mainBody.getLinearVelocity().y));
+			mainBody.applyLinearImpulse(new Vector2(2f, 0), mainBody.getWorldCenter(), true);
+			if (i == 100) {
+				mainBody.applyLinearImpulse(new Vector2(0, 64f), mainBody.getWorldCenter(), true);
+				i = 0;
+			}
+		}
 	}
 	
 	@Override
@@ -235,5 +245,7 @@ public class MyGdxPractice extends ApplicationAdapter {
 		test.dispose();
 		stage.dispose();
 		map.dispose();
+		box2dRender.dispose();
+		world.dispose();
 	}
 }

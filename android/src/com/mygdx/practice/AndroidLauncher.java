@@ -6,7 +6,6 @@ import android.view.View;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import com.mygdx.practice.MyGdxPractice;
 
 public class AndroidLauncher extends AndroidApplication implements View.OnSystemUiVisibilityChangeListener {
 	@Override
@@ -24,7 +23,7 @@ public class AndroidLauncher extends AndroidApplication implements View.OnSystem
 		);
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		initialize(new MyGdxPractice(), config);
+		initialize(new TestForJump(), config);
 	}
 
 

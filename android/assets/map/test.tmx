@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="128" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="15">
+<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="128" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="19">
  <tileset firstgid="1" source="NES - Super Mario Bros - Tileset.tsx"/>
  <layer id="1" name="background" width="128" height="32">
   <data encoding="base64" compression="zlib">
@@ -15,12 +15,41 @@
   <object id="6" name="basic_road" x="0" y="432.372" width="2046.96" height="78.1189"/>
  </objectgroup>
  <objectgroup id="7" name="tower">
-  <object id="10" name="tower1" x="639.902" y="398.602" width="31.5568" height="34.4277"/>
-  <object id="11" name="tower2" x="766.67" y="383.797" width="33.2933" height="49.0151"/>
+  <object id="10" name="tower1" x="639.902" y="399.6" width="31.5568" height="32"/>
+  <object id="11" name="tower2" x="768" y="383.797" width="32" height="49.0151"/>
  </objectgroup>
  <objectgroup id="8" name="brick">
-  <object id="12" name="common1" type="common" x="464.16" y="351" width="31" height="17"/>
-  <object id="13" name="common2" type="common" x="512" y="352" width="31.9844" height="16"/>
-  <object id="14" name="money" type="money" x="496" y="352" width="16" height="16"/>
+  <properties>
+   <property name="breakable" type="bool" value="true"/>
+  </properties>
+  <object id="12" type="common" x="464" y="352" width="15.6653" height="16">
+   <properties>
+    <property name="breakable" type="bool" value="true"/>
+    <property name="hasMoney" type="bool" value="false"/>
+   </properties>
+  </object>
+  <object id="14" name="money" type="money" x="496" y="352" width="16" height="16">
+   <properties>
+    <property name="hasMoney" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="16" type="common" x="480" y="352" width="15.6653" height="16">
+   <properties>
+    <property name="breakable" type="bool" value="true"/>
+    <property name="hasMoney" type="bool" value="false"/>
+   </properties>
+  </object>
+  <object id="17" type="common" x="527.509" y="352" width="15.6653" height="16">
+   <properties>
+    <property name="breakable" type="bool" value="true"/>
+    <property name="hasMoney" type="bool" value="false"/>
+   </properties>
+  </object>
+  <object id="18" type="common" x="512" y="352" width="15.6653" height="16">
+   <properties>
+    <property name="breakable" type="bool" value="true"/>
+    <property name="hasMoney" type="bool" value="false"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

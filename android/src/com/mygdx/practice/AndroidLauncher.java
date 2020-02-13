@@ -23,7 +23,7 @@ public class AndroidLauncher extends AndroidApplication implements View.OnSystem
 		);
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		initialize(new TestForJump(), config);
+		initialize(new MarioGame(), config);
 	}
 
 

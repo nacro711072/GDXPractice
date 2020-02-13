@@ -76,7 +76,7 @@ public class JustTestFreeFall extends ApplicationAdapter {
 
     @Override
     public void render() {
-        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClearColor(83 / 255f, 157 / 255f, 252 / 255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 //        mainBody.applyLinearImpulse(new Vector2(0.001f, 0.0f), mainBody.getWorldCenter(), true);

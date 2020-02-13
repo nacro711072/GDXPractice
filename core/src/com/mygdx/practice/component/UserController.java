@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.practice.model.PressModel;
+import com.mygdx.practice.util.ZoomHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,16 +33,28 @@ public final class UserController implements Disposable, InputProcessor {
     private SpriteBatch batch = new SpriteBatch();
     private List<OnTouchListener> touchListeners = new ArrayList<>();
 
+    private ZoomHelper zh = new ZoomHelper(1);
 
     public UserController(String pathOfLeftAndRight, String pathOfJump) {
+        this(pathOfLeftAndRight, pathOfJump, null);
+    }
+
+    public UserController(String pathOfLeftAndRight, String pathOfJump, ZoomHelper zh) {
+        if (zh != null) {
+            this.zh = zh;
+        }
         mLeftAndRight = new Texture(pathOfLeftAndRight);
         mJump = new Texture(pathOfJump);
 
-        float x = -fixCamera.viewportWidth / 2 + mLeftAndRight.getWidth() + 24;
-        float y = -fixCamera.viewportHeight / 2 + 12;
-        rectangleRight = new Rectangle(x, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
-        rectangleLeft = new Rectangle(x - mLeftAndRight.getWidth() - 12, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
-        rectangleJump = new Rectangle(fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 12, mJump.getWidth(), mJump.getHeight());
+        updateRectangle();
+    }
+
+    private void updateRectangle() {
+        float x = zh.scalePixel(-fixCamera.viewportWidth / 2 + mLeftAndRight.getWidth() + 24);
+        float y = zh.scalePixel(-fixCamera.viewportHeight / 2 + 12);
+        rectangleRight = new Rectangle(x, y, zh.scalePixel(mLeftAndRight.getWidth()), zh.scalePixel(mLeftAndRight.getHeight()));
+        rectangleLeft = new Rectangle(x - zh.scalePixel(mLeftAndRight.getWidth() - 12), y, zh.scalePixel(mLeftAndRight.getWidth()), zh.scalePixel(mLeftAndRight.getHeight()));
+        rectangleJump = new Rectangle(zh.scalePixel(fixCamera.viewportWidth / 2 - 60), zh.scalePixel(-fixCamera.viewportHeight / 2 + 12), zh.scalePixel(mJump.getWidth() * 0.07f), zh.scalePixel(mJump.getHeight() * 0.07f));
     }
 
     @Override
@@ -75,25 +88,11 @@ public final class UserController implements Disposable, InputProcessor {
             isJumpPress.pointer = pointer;
         }
 
-//        for (OnTouchListener listener: touchListeners) {
-//            if (isRightPress) {
-//                listener.onTouchRight(pointer);
-//            }
-//            if (isLeftPress) {
-//                listener.onTouchLeft(pointer);
-//            }
-//            if (isJumpPress) {
-//                listener.onJump(pointer);
-//            }
-//        }
-
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-//        Vector3 vec = new Vector3(screenX, screenY, 0);
-//        fixCamera.unproject(vec);
         Gdx.app.log("controller", String.format("up, p: %s", pointer));
         if (isRightPress.pointer == pointer) {
             isRightPress.isPress = false;
@@ -102,21 +101,9 @@ public final class UserController implements Disposable, InputProcessor {
             isLeftPress.isPress = false;
             isLeftPress.pointer = -1;
         } else if (isJumpPress.pointer == pointer) {
-            isJumpPress.isPress = false;
+              isJumpPress.isPress = false;
             isJumpPress.pointer = -1;
         }
-
-//        for (OnTouchListener listener: touchListeners) {
-//            if (isRightPress) {
-//                listener.onTouchRight(pointer);
-//            }
-//            if (isLeftPress) {
-//                listener.onTouchLeft(pointer);
-//            }
-//            if (isJumpPress) {
-//                listener.onJump(pointer);
-//            }
-//        }
 
         return false;
     }
@@ -137,6 +124,9 @@ public final class UserController implements Disposable, InputProcessor {
     }
 
     public void render() {
+        if (zh == null) {
+            zh = new ZoomHelper(1);
+        }
         batch.setProjectionMatrix(fixCamera.combined);
 
         batch.begin();
@@ -145,7 +135,7 @@ public final class UserController implements Disposable, InputProcessor {
                 rectangleRight.x, rectangleRight.y, // 圖片左下角的點
                 0, 0, // 操作的中心點???
                 mLeftAndRight.getWidth(), mLeftAndRight.getHeight(), // 渲染出來的寬高
-                1f, 1f,
+                1, 1,
                 0f,  // 逆時針旋轉 角度
                 0, 0,  // 操作目標的起始點
                 mLeftAndRight.getWidth(), mLeftAndRight.getHeight(), // 操作目標的寬高
@@ -155,7 +145,7 @@ public final class UserController implements Disposable, InputProcessor {
                 -fixCamera.viewportWidth / 2 + mLeftAndRight.getWidth() + 12, rectangleRight.y, // 圖片左下角的點
                 0, mLeftAndRight.getHeight() / 2, // 操作的中心點???
                 mLeftAndRight.getWidth(), mLeftAndRight.getHeight(), // 渲染出來的寬高
-                1f, 1f,
+                zh.scalePixel(), zh.scalePixel(),
                 180f,  // 逆時針旋轉 角度
                 0, 0,  // 操作目標的起始點
                 mLeftAndRight.getWidth(), mLeftAndRight.getHeight(), // 操作目標的寬高
@@ -163,10 +153,10 @@ public final class UserController implements Disposable, InputProcessor {
 
 // jump
         batch.draw(mJump,
-                fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 12,
+                fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 24,
                 0, 0,
                 mJump.getWidth(), mJump.getHeight(),
-                0.09f, 0.09f,
+                zh.scalePixel(0.07f), zh.scalePixel(0.07f),
                 0f,
                 0, 0,
                 mJump.getWidth(), mJump.getHeight(),
@@ -185,12 +175,6 @@ public final class UserController implements Disposable, InputProcessor {
                 listener.onJump(1);
             }
         }
-
-//        for (int i = 0; i < 20; ++i) { // AndroidInput.NUM_TOUCHES = 20
-//            if (Gdx.input.isTouched()) {
-//                touchDown(Gdx.app.getInput().getX(), Gdx.app.getInput().getY(), 0, i);
-//            }
-//        }
     }
 
     public void addOnTouchListener(OnTouchListener listener) {
@@ -199,11 +183,7 @@ public final class UserController implements Disposable, InputProcessor {
 
     public void setCameraViewport(float width, float height) {
         fixCamera = new OrthographicCamera(width, height);
-        float x = -fixCamera.viewportWidth / 2 + mLeftAndRight.getWidth() + 24;
-        float y = -fixCamera.viewportHeight / 2 + 12;
-        rectangleRight = new Rectangle(x, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
-        rectangleLeft = new Rectangle(x - mLeftAndRight.getWidth() - 12, y, mLeftAndRight.getWidth(), mLeftAndRight.getHeight());
-        rectangleJump = new Rectangle(fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 12, mJump.getWidth(), mJump.getHeight());
+        updateRectangle();
     }
 
 

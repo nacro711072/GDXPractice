@@ -4,14 +4,22 @@ package com.mygdx.practice.util;
  * Nick, 2020-02-10
  */
 public class ZoomHelper {
-    public static final float PPM = 100f;
+    private final float PPM;
 
-    public static float scalePixel(float in) {
+    public ZoomHelper(float zoom) {
+        PPM = zoom;
+    }
+
+    public float scalePixel(float in) {
         return in / PPM;
     }
 
-    public static float scalePixel(int in) {
+    public float scalePixel(int in) {
         return in / PPM;
+    }
+
+    public float scalePixel() {
+        return 1 / PPM;
     }
 
 }

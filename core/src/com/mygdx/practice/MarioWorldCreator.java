@@ -61,7 +61,7 @@ public class MarioWorldCreator implements Disposable {
         shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
         fixtureDef.shape = shape2;
         body.createFixture(fixtureDef);
-
+// tower
         for (RectangleMapObject mapObj: map.getLayers().get(3).getObjects().getByType(RectangleMapObject.class)) {
             rect = mapObj.getRectangle();
             bdef = new BodyDef();
@@ -76,7 +76,21 @@ public class MarioWorldCreator implements Disposable {
             fixtureDef.shape = shape2;
             body.createFixture(fixtureDef);
         }
+// brick
+        for (RectangleMapObject mapObj: map.getLayers().get(4).getObjects().getByType(RectangleMapObject.class)) {
+            rect = mapObj.getRectangle();
+            bdef = new BodyDef();
+            bdef.type = BodyDef.BodyType.StaticBody;
+            bdef.position.set(zh.scalePixel(rect.getX() + rect.getWidth() / 2), zh.scalePixel(rect.getY() + rect.getHeight() / 2));
 
+            body = world.createBody(bdef);
+            fixtureDef = new FixtureDef();
+            fixtureDef.friction = 0f;
+            shape2 = new PolygonShape();
+            shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
+            fixtureDef.shape = shape2;
+            body.createFixture(fixtureDef);
+        }
 
         mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel());
     }

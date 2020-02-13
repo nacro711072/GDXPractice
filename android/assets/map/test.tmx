@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="128" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="12">
+<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="128" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="15">
  <tileset firstgid="1" source="NES - Super Mario Bros - Tileset.tsx"/>
  <layer id="1" name="background" width="128" height="32">
   <data encoding="base64" compression="zlib">
    eAHt2TEKwCAQRUHJ/S+Us9nEgL+zEQQRp5BtAgn7pgnWp5Tq2AEDDDDAAAMMMMAAAwwwwAADDDDAAAMMMMAAAwwwwAADDHQDb5s57hLvu09N+3/qbwcMMMAAAwwwwAADDDDAAAMMnGUg//W6ndVtplca754z3+zZdR53d8/7NV3X1C7tkgEGGGCAAQYYYIABBkYGPvadvUo=
   </data>
  </layer>
- <layer id="4" name="load" width="128" height="32" opacity="0.94">
+ <layer id="4" name="load" width="128" height="32">
   <data encoding="base64" compression="zlib">
    eAHt0jEKgDAQBMBYamFhJ/oCfZP//4YXSBEQCZbqHCyGBCzmNiVDgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgACBe4EpnnLm8s1nQ4AAgacCfZfSEDHfFGjtd4vd7/b/muWPsasjspTU53y3Rupp7bf1Xv/L+SqQuYWBDuiADuiADuiADvynAyds/gWF
   </data>
@@ -17,5 +17,10 @@
  <objectgroup id="7" name="tower">
   <object id="10" name="tower1" x="639.902" y="398.602" width="31.5568" height="34.4277"/>
   <object id="11" name="tower2" x="766.67" y="383.797" width="33.2933" height="49.0151"/>
+ </objectgroup>
+ <objectgroup id="8" name="brick">
+  <object id="12" name="common1" type="common" x="464.16" y="351" width="31" height="17"/>
+  <object id="13" name="common2" type="common" x="512" y="352" width="31.9844" height="16"/>
+  <object id="14" name="money" type="money" x="496" y="352" width="16" height="16"/>
  </objectgroup>
 </map>

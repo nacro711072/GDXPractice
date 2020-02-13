@@ -51,9 +51,9 @@ public final class UserController implements Disposable, InputProcessor {
 
     private void updateRectangle() {
         float x = zh.scalePixel(-fixCamera.viewportWidth / 2 + mLeftAndRight.getWidth() + 24);
-        float y = zh.scalePixel(-fixCamera.viewportHeight / 2 + 12);
+        float y = zh.scalePixel(-fixCamera.viewportHeight / 2) + 12;
         rectangleRight = new Rectangle(x, y, zh.scalePixel(mLeftAndRight.getWidth()), zh.scalePixel(mLeftAndRight.getHeight()));
-        rectangleLeft = new Rectangle(x - zh.scalePixel(mLeftAndRight.getWidth() - 12), y, zh.scalePixel(mLeftAndRight.getWidth()), zh.scalePixel(mLeftAndRight.getHeight()));
+        rectangleLeft = new Rectangle(x - zh.scalePixel(mLeftAndRight.getWidth()) - 12, y, zh.scalePixel(mLeftAndRight.getWidth()), zh.scalePixel(mLeftAndRight.getHeight()));
         rectangleJump = new Rectangle(zh.scalePixel(fixCamera.viewportWidth / 2 - 60), zh.scalePixel(-fixCamera.viewportHeight / 2 + 12), zh.scalePixel(mJump.getWidth() * 0.07f), zh.scalePixel(mJump.getHeight() * 0.07f));
     }
 
@@ -76,7 +76,6 @@ public final class UserController implements Disposable, InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector3 vec = new Vector3(screenX, screenY, 0);
         fixCamera.unproject(vec);
-        Gdx.app.log("controller", String.format("down, p: %s", pointer));
         if (rectangleRight.contains(vec.x, vec.y)) {
             isRightPress.isPress = true;
             isRightPress.pointer = pointer;
@@ -101,7 +100,7 @@ public final class UserController implements Disposable, InputProcessor {
             isLeftPress.isPress = false;
             isLeftPress.pointer = -1;
         } else if (isJumpPress.pointer == pointer) {
-              isJumpPress.isPress = false;
+            isJumpPress.isPress = false;
             isJumpPress.pointer = -1;
         }
 

@@ -21,7 +21,7 @@ import com.mygdx.practice.util.ZoomHelper;
  */
 public class MarioGame extends ApplicationAdapter {
     private static final int width = 40;
-    private static final int height = 25;
+    private static final int height = 21;
     private Texture test;
     private SpriteBatch batch;
     private UserController controller;
@@ -50,7 +50,7 @@ public class MarioGame extends ApplicationAdapter {
 
             @Override
             public void onTouchLeft(int pointer) {
-                if (jumpBody.getLinearVelocity().x < -0.4) {
+                if (jumpBody.getLinearVelocity().x > -0.4) {
                     jumpBody.applyLinearImpulse(new Vector2(-0.004f, 0), jumpBody.getWorldCenter(), true);
                 }
             }
@@ -82,7 +82,7 @@ public class MarioGame extends ApplicationAdapter {
         batch.begin();
 
         Vector2 p = jumpBody.getPosition();
-        Gdx.app.log("new", String.format("position: (%s, %s)", p.x, p.y));
+//        Gdx.app.log("new", String.format("position: (%s, %s)", p.x, p.y));
         batch.draw(test,
                 p.x - zh.scalePixel(test.getWidth() / 2f) / 2, p.y - zh.scalePixel(test.getHeight() / 2f) / 2,
                 0, 0,

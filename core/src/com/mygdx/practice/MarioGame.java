@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
@@ -14,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.mygdx.practice.component.UserController;
+import com.mygdx.practice.util.CameraHelper;
 import com.mygdx.practice.util.ZoomHelper;
 
 /**
@@ -21,7 +23,7 @@ import com.mygdx.practice.util.ZoomHelper;
  */
 public class MarioGame extends ApplicationAdapter {
     private static final int width = 40;
-    private static final int height = 21;
+    private static final int height = 25;
     private Texture test;
     private SpriteBatch batch;
     private UserController controller;
@@ -38,7 +40,7 @@ public class MarioGame extends ApplicationAdapter {
         marioWorldCreator = new MarioWorldCreator(new World(new Vector2(0,-0.2f), true), zh);
         test = new Texture("lady_beetle.png");
         batch = new SpriteBatch();
-        stage = new Stage(new ScalingViewport(Scaling.fill, width / 2, height / 2, camera));
+        stage = new Stage(new ScalingViewport(Scaling.fillX, width / 2, height / 2, camera));
         controller = new UserController("arrow.png", "up.png");
         controller.addOnTouchListener(new UserController.OnTouchListener() {
             @Override
@@ -100,6 +102,8 @@ public class MarioGame extends ApplicationAdapter {
         stage.act();
         stage.draw();
 
+        Rectangle cameraBound = new Rectangle(width / 4f, height / 4f, 180, height / 2f);
+        CameraHelper.lookAt(camera, jumpBody.getPosition(), new Vector2(1, 1), cameraBound);
     }
 
     @Override

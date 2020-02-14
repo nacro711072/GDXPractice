@@ -109,7 +109,7 @@ public class MarioWorldCreator implements Disposable {
                 BodyDef bodyDef = new BodyDef();
                 bodyDef.linearDamping = 0.1f;
                 bodyDef.type = BodyDef.BodyType.DynamicBody;
-                bodyDef.position.set(2, 10);
+                bodyDef.position.set(2, 5);
 
                 Body body = world.createBody(bodyDef);
                 body.createFixture(fdef);

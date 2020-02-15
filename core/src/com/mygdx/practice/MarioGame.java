@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
@@ -14,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.mygdx.practice.component.UserController;
+import com.mygdx.practice.model.Mario;
+import com.mygdx.practice.model.MarioState;
 import com.mygdx.practice.util.ZoomHelper;
 
 /**
@@ -36,7 +39,7 @@ public class MarioGame extends ApplicationAdapter {
     @Override
     public void create() {
         marioWorldCreator = new MarioWorldCreator(new World(new Vector2(0,-0.2f), true), zh);
-        test = new Texture("lady_beetle.png");
+        test = new Texture("mario_sheet.png");
         batch = new SpriteBatch();
         stage = new Stage(new ScalingViewport(Scaling.fill, width / 2, height / 2, camera));
         controller = new UserController("arrow.png", "up.png");
@@ -45,6 +48,9 @@ public class MarioGame extends ApplicationAdapter {
             public void onTouchRight(int pointer) {
                 if (jumpBody.getLinearVelocity().x < 0.4) {
                     jumpBody.applyLinearImpulse(new Vector2(0.004f, 0), jumpBody.getWorldCenter(), true);
+                    Mario userData = ((Mario) jumpBody.getUserData());
+                    userData.face = true;
+                    userData.state = MarioState.RUN;
                 }
             }
 
@@ -52,6 +58,9 @@ public class MarioGame extends ApplicationAdapter {
             public void onTouchLeft(int pointer) {
                 if (jumpBody.getLinearVelocity().x > -0.4) {
                     jumpBody.applyLinearImpulse(new Vector2(-0.004f, 0), jumpBody.getWorldCenter(), true);
+                    Mario userData = ((Mario) jumpBody.getUserData());
+                    userData.face = false;
+                    userData.state = MarioState.RUN;
                 }
             }
 
@@ -59,6 +68,8 @@ public class MarioGame extends ApplicationAdapter {
             public void onJump(int pointer) {
                 if (jumpBody.getLinearVelocity().y == 0) {
                     jumpBody.applyLinearImpulse(new Vector2(0, 0.2f), jumpBody.getWorldCenter(), true);
+                    Mario userData = ((Mario) jumpBody.getUserData());
+                    userData.state = MarioState.JUMP;
                 }
             }
         });
@@ -83,15 +94,25 @@ public class MarioGame extends ApplicationAdapter {
 
         Vector2 p = jumpBody.getPosition();
 //        Gdx.app.log("new", String.format("position: (%s, %s)", p.x, p.y));
-        batch.draw(test,
-                p.x - zh.scalePixel(test.getWidth() / 2f) / 2, p.y - zh.scalePixel(test.getHeight() / 2f) / 2,
-                0, 0,
-                test.getWidth(), test.getHeight(),
-                zh.scalePixel() / 2, zh.scalePixel() / 2,
-                0,
-                0, 0,
-                test.getWidth(), test.getHeight(),
-                false, false);
+        TextureRegion a = new TextureRegion(test, 1, 1, 16, 32);
+
+//        Gdx.input.getRotation()
+        Mario userData = (Mario) jumpBody.getUserData();
+        // LEFT
+        if (userData.face) {
+            batch.draw(a,
+                    p.x - zh.scalePixel(a.getRegionWidth()) / 2f, p.y - zh.scalePixel(a.getRegionHeight()) / 2f,
+                    a.getRegionWidth() * zh.scalePixel(), a.getRegionHeight() * zh.scalePixel()
+            );
+        } else {
+            batch.draw(a,
+                    p.x + zh.scalePixel(a.getRegionWidth() / 2f), p.y - zh.scalePixel(a.getRegionHeight() / 2f),
+                    p.x, p.y,
+                    -zh.scalePixel(a.getRegionWidth()), zh.scalePixel(a.getRegionHeight()),
+                    1, 1,
+                    0f);
+        }
+        // right
 
         batch.end();
 

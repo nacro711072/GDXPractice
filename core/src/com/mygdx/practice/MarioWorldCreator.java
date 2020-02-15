@@ -16,6 +16,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.practice.model.Mario;
 import com.mygdx.practice.util.ZoomHelper;
 
 /**
@@ -98,8 +99,9 @@ public class MarioWorldCreator implements Disposable {
     public Body createCharacter(Character character) {
         switch (character) {
             case Mario: {
-                Shape shape = new CircleShape();
-                shape.setRadius(0.24f);
+                PolygonShape shape = new PolygonShape();
+                shape.setAsBox(0.18f, 0.34f);
+//                shape.setRadius(0.24f);
 
                 FixtureDef fdef = new FixtureDef();
                 fdef.shape = shape;
@@ -112,6 +114,7 @@ public class MarioWorldCreator implements Disposable {
                 bodyDef.position.set(2, 10);
 
                 Body body = world.createBody(bodyDef);
+                body.setUserData(new Mario());
                 body.createFixture(fdef);
                 return body;
             }

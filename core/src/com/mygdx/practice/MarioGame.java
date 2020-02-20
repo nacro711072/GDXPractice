@@ -16,8 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.mygdx.practice.component.UserController;
+import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.util.CameraHelper;
-import com.mygdx.practice.model.Mario;
 import com.mygdx.practice.model.MarioState;
 import com.mygdx.practice.util.ZoomHelper;
 
@@ -27,21 +27,23 @@ import com.mygdx.practice.util.ZoomHelper;
 public class MarioGame extends ApplicationAdapter {
     private static final int width = 40;
     private static final int height = 25;
-    private Texture test;
+    private Texture marioSheet;
+    private TextureRegion marioTexture;
     private SpriteBatch batch;
     private UserController controller;
     private OrthographicCamera camera = new OrthographicCamera(width, height);
 
-    private MarioWorldCreator marioWorldCreator;
+    private MarioWorld marioWorld;
     private Body jumpBody;
 
     private Stage stage;
-    private ZoomHelper zh = new ZoomHelper(40);
+    private ZoomHelper zh = new ZoomHelper(36);
 
     @Override
     public void create() {
-        marioWorldCreator = new MarioWorldCreator(new World(new Vector2(0,-0.2f), true), zh);
-        test = new Texture("mario_sheet.png");
+        marioWorld = new MarioWorld(new World(new Vector2(0,-0.2f), true), zh, "map/test.tmx");
+        marioSheet = new Texture("mario_sheet.png");
+        marioTexture = new TextureRegion(marioSheet, 1, 1, 16, 32);
         batch = new SpriteBatch();
         stage = new Stage(new ScalingViewport(Scaling.fillX, width / 2, height / 2, camera));
         controller = new UserController("arrow.png", "up.png");
@@ -50,9 +52,9 @@ public class MarioGame extends ApplicationAdapter {
             public void onTouchRight(int pointer) {
                 if (jumpBody.getLinearVelocity().x < 0.4) {
                     jumpBody.applyLinearImpulse(new Vector2(0.004f, 0), jumpBody.getWorldCenter(), true);
-                    Mario userData = ((Mario) jumpBody.getUserData());
+                    MarioBodyData userData = ((MarioBodyData) jumpBody.getUserData());
                     userData.face = true;
-                    userData.state = MarioState.RUN;
+                    userData.changeState(MarioState.RUN);
                 }
             }
 
@@ -60,27 +62,25 @@ public class MarioGame extends ApplicationAdapter {
             public void onTouchLeft(int pointer) {
                 if (jumpBody.getLinearVelocity().x > -0.4) {
                     jumpBody.applyLinearImpulse(new Vector2(-0.004f, 0), jumpBody.getWorldCenter(), true);
-                    Mario userData = ((Mario) jumpBody.getUserData());
+                    MarioBodyData userData = ((MarioBodyData) jumpBody.getUserData());
                     userData.face = false;
-                    userData.state = MarioState.RUN;
+                    userData.changeState(MarioState.RUN);
                 }
             }
 
             @Override
             public void onJump(int pointer) {
-                if (jumpBody.getLinearVelocity().y == 0) {
-                    jumpBody.applyLinearImpulse(new Vector2(0, 0.2f), jumpBody.getWorldCenter(), true);
-                    Mario userData = ((Mario) jumpBody.getUserData());
-                    userData.state = MarioState.JUMP;
+                MarioBodyData userData = ((MarioBodyData) jumpBody.getUserData());
+                if (userData.getState() != MarioState.JUMP) {
+                    jumpBody.applyLinearImpulse(new Vector2(0, 0.4f), jumpBody.getWorldCenter(), true);
+                    userData.changeState(MarioState.JUMP);
                 }
             }
         });
         controller.setCameraViewport(800, 500);
         Gdx.input.setInputProcessor(new InputMultiplexer(controller));
 
-        marioWorldCreator.createMap("map/test.tmx");
-
-        jumpBody = marioWorldCreator.createCharacter(MarioWorldCreator.Character.Mario);
+        jumpBody = marioWorld.getCharacter(MarioWorld.CharacterId.Mario).getBody();
 
     }
 
@@ -89,28 +89,28 @@ public class MarioGame extends ApplicationAdapter {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        marioWorldCreator.render(camera);
+        Rectangle cameraBound = new Rectangle(width / 4f, height / 4f, 180, height / 2f);
+        CameraHelper.lookAt(camera, jumpBody.getPosition(), new Vector2(1, 1), cameraBound);
+
+        marioWorld.render(camera);
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
         Vector2 p = jumpBody.getPosition();
-//        Gdx.app.log("new", String.format("position: (%s, %s)", p.x, p.y));
-        TextureRegion a = new TextureRegion(test, 1, 1, 16, 32);
 
-//        Gdx.input.getRotation()
-        Mario userData = (Mario) jumpBody.getUserData();
+        MarioBodyData userData = (MarioBodyData) jumpBody.getUserData();
         // LEFT
         if (userData.face) {
-            batch.draw(a,
-                    p.x - zh.scalePixel(a.getRegionWidth()) / 2f, p.y - zh.scalePixel(a.getRegionHeight()) / 2f,
-                    a.getRegionWidth() * zh.scalePixel(), a.getRegionHeight() * zh.scalePixel()
+            batch.draw(marioTexture,
+                    p.x - zh.scalePixel(marioTexture.getRegionWidth()) / 2f, p.y - zh.scalePixel(marioTexture.getRegionHeight()) / 2f,
+                    marioTexture.getRegionWidth() * zh.scalePixel(), marioTexture.getRegionHeight() * zh.scalePixel()
             );
         } else {
-            batch.draw(a,
-                    p.x + zh.scalePixel(a.getRegionWidth() / 2f), p.y - zh.scalePixel(a.getRegionHeight() / 2f),
+            batch.draw(marioTexture,
+                    p.x + zh.scalePixel(marioTexture.getRegionWidth() / 2f), p.y - zh.scalePixel(marioTexture.getRegionHeight() / 2f),
                     p.x, p.y,
-                    -zh.scalePixel(a.getRegionWidth()), zh.scalePixel(a.getRegionHeight()),
+                    -zh.scalePixel(marioTexture.getRegionWidth()), zh.scalePixel(marioTexture.getRegionHeight()),
                     1, 1,
                     0f);
         }
@@ -123,16 +123,14 @@ public class MarioGame extends ApplicationAdapter {
         stage.act();
         stage.draw();
 
-        Rectangle cameraBound = new Rectangle(width / 4f, height / 4f, 180, height / 2f);
-        CameraHelper.lookAt(camera, jumpBody.getPosition(), new Vector2(1, 1), cameraBound);
     }
 
     @Override
     public void dispose() {
         super.dispose();
         batch.dispose();
-        test.dispose();
-        marioWorldCreator.dispose();
+        marioSheet.dispose();
+        marioWorld.dispose();
         stage.dispose();
         controller.dispose();
     }

@@ -15,13 +15,13 @@ public class CameraHelper {
         float diffY = target.y - camera.position.y;
         float moveX = 0;
         float moveY = 0;
-        Gdx.app.log("cameraHelper", String.format("camera: (%s, %s), target: (%s, %s)", camera.position.x, camera.position.y, target.x, target.y));
+//        Gdx.app.log("cameraHelper", String.format("camera: (%s, %s), target: (%s, %s)", camera.position.x, camera.position.y, target.x, target.y));
 
         if (diffX > panRange.x) { // target x 超出 追蹤 邊界
             moveX = diffX - panRange.x;
-            Gdx.app.log("cameraHelper", "out of x");
+//            Gdx.app.log("cameraHelper", "out of x");
         } else if (diffX < -panRange.x) {
-            Gdx.app.log("cameraHelper", "out of x");
+//            Gdx.app.log("cameraHelper", "out of x");
             moveX = diffX + panRange.x;
         }
         if (diffY > panRange.y) { // target y 超出 追蹤 邊界
@@ -33,7 +33,7 @@ public class CameraHelper {
         }
 
         float newX = camera.position.x + moveX;
-        Gdx.app.log("cameraHelper", String.format("new x:%s, bound x:[%s, %s]", newX, cameraBound.x, cameraBound.x + cameraBound.getWidth()));
+//        Gdx.app.log("cameraHelper", String.format("new x:%s, bound x:[%s, %s]", newX, cameraBound.x, cameraBound.x + cameraBound.getWidth()));
 
         if (cameraBound.x < newX && cameraBound.x + cameraBound.getWidth() > newX) {
             camera.translate(moveX, 0, 0);

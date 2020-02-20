@@ -92,7 +92,6 @@ public final class UserController implements Disposable, InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        Gdx.app.log("controller", String.format("up, p: %s", pointer));
         if (isRightPress.pointer == pointer) {
             isRightPress.isPress = false;
             isRightPress.pointer = -1;

@@ -7,6 +7,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -21,6 +22,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.practice.character.Character;
 import com.mygdx.practice.character.Mario;
+import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioState;
@@ -32,7 +34,7 @@ import java.util.List;
 /**
  * Nick, 2020-02-13
  */
-public class MarioWorld implements Disposable {
+public class MarioWorld implements Disposable, UserController.TouchListener {
     private World world;
     private ZoomHelper zh;
 
@@ -41,6 +43,7 @@ public class MarioWorld implements Disposable {
 
     private Box2DDebugRenderer box2dRender;
 
+    private Mario mario;
     private List<Character> characters = new ArrayList<>();
 
     MarioWorld(World world, ZoomHelper zoomHelper, String path) {
@@ -49,7 +52,8 @@ public class MarioWorld implements Disposable {
         box2dRender = new Box2DDebugRenderer();
         createMap(path);
 
-        characters.add(new Mario(world, CharacterId.Mario));
+        mario = new Mario(world, CharacterId.Mario);
+        characters.add(mario);
 
         world.setContactListener(new ContactListener() {
             @Override
@@ -132,10 +136,10 @@ public class MarioWorld implements Disposable {
 
     }
 
-    public Character getCharacter(CharacterId id) {
+    public Body getBodyById(CharacterId id) {
         for (Character character: characters) {
             if (character.getId() == id) {
-                return character;
+                return character.getBody();
             }
         }
         return null;
@@ -148,6 +152,10 @@ public class MarioWorld implements Disposable {
         mapRender.render();
 
         box2dRender.render(world, camera.combined);
+
+        for (Character character : characters) {
+            character.render(camera, zh);
+        }
     }
 
     @Override
@@ -155,6 +163,29 @@ public class MarioWorld implements Disposable {
         world.dispose();
         map.dispose();
         box2dRender.dispose();
+        for (Character character : characters) {
+            character.dispose();
+        }
+    }
+
+    @Override
+    public void onTouchRight(int pointer) {
+        mario.onTouchRight(pointer);
+    }
+
+    @Override
+    public void onTouchLeft(int pointer) {
+        mario.onTouchLeft(pointer);
+    }
+
+    @Override
+    public void onJump(int pointer) {
+        mario.onJump(pointer);
+    }
+
+    @Override
+    public void onNoAction() {
+        mario.onNoAction();
     }
 
     public enum CharacterId {

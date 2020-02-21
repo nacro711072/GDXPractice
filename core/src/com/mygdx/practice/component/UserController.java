@@ -31,7 +31,7 @@ public final class UserController implements Disposable, InputProcessor {
 
     private OrthographicCamera fixCamera = new OrthographicCamera();
     private SpriteBatch batch = new SpriteBatch();
-    private List<OnTouchListener> touchListeners = new ArrayList<>();
+    private List<TouchListener> touchListeners = new ArrayList<>();
 
     private ZoomHelper zh = new ZoomHelper(1);
 
@@ -85,6 +85,10 @@ public final class UserController implements Disposable, InputProcessor {
         } else if (rectangleJump.contains(vec.x, vec.y)) {
             isJumpPress.isPress = true;
             isJumpPress.pointer = pointer;
+        } else {
+            for (TouchListener listener: touchListeners) {
+                listener.onNoAction();
+            }
         }
 
         return false;
@@ -121,10 +125,19 @@ public final class UserController implements Disposable, InputProcessor {
         return false;
     }
 
+    public void preRender() {
+        if (!Gdx.input.isTouched()) {
+            for (TouchListener t : touchListeners) {
+                t.onNoAction();
+            }
+        }
+    }
+
     public void render() {
         if (zh == null) {
             zh = new ZoomHelper(1);
         }
+
         batch.setProjectionMatrix(fixCamera.combined);
 
         batch.begin();
@@ -162,7 +175,7 @@ public final class UserController implements Disposable, InputProcessor {
 
         batch.end();
 
-        for (OnTouchListener listener: touchListeners) {
+        for (TouchListener listener: touchListeners) {
             if (isRightPress.isPress) {
                 listener.onTouchRight(1);
             }
@@ -175,7 +188,7 @@ public final class UserController implements Disposable, InputProcessor {
         }
     }
 
-    public void addOnTouchListener(OnTouchListener listener) {
+    public void addTouchListener(TouchListener listener) {
         touchListeners.add(listener);
     }
 
@@ -190,10 +203,11 @@ public final class UserController implements Disposable, InputProcessor {
         batch.dispose();
     }
 
-    public interface OnTouchListener {
+    public interface TouchListener {
         void onTouchRight(int pointer);
         void onTouchLeft(int pointer);
         void onJump(int pointer);
+        void onNoAction();
     }
 
 }

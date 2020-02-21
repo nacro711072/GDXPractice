@@ -57,30 +57,30 @@ public class MyGdxPractice extends ApplicationAdapter {
 		box2dRender = new Box2DDebugRenderer();
 
 		arror.setCameraViewport(width, height);
-		arror.addOnTouchListener(new UserController.OnTouchListener() {
-			@Override
-			public void onTouchRight(int pointer) {
-
-//				camera.translate(2, 0, 0);
-			}
-
-			@Override
-			public void onTouchLeft(int pointer) {
-
-				if (camera.position.x < 500f) {
-					camera.position.x = 500f;
-					return;
-				} else if (camera.position.x == 500f) {
-					return;
-				}
-				camera.translate(-2, 0, 0);
-			}
-
-            @Override
-            public void onJump(int pointer) {
-
-            }
-        });
+//		arror.addTouchListener(new UserController.TouchListener() {
+//			@Override
+//			public void onTouchRight(int pointer) {
+//
+////				camera.translate(2, 0, 0);
+//			}
+//
+//			@Override
+//			public void onTouchLeft(int pointer) {
+//
+//				if (camera.position.x < 500f) {
+//					camera.position.x = 500f;
+//					return;
+//				} else if (camera.position.x == 500f) {
+//					return;
+//				}
+//				camera.translate(-2, 0, 0);
+//			}
+//
+//            @Override
+//            public void onJump(int pointer) {
+//
+//            }
+//        });
 		TmxMapLoader mapLoader = new TmxMapLoader();
 		map = mapLoader.load("map/test.tmx");
 
@@ -142,46 +142,46 @@ public class MyGdxPractice extends ApplicationAdapter {
 		image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
 //		image.setPosition();
 
-		arror.addOnTouchListener(new UserController.OnTouchListener() {
-			@Override
-			public void onTouchRight(int pointer) {
-				if (Math.abs(mainBody.getLinearVelocity().x) < 32) {
-					if (mainBody.getLinearVelocity().y != 0) {
-//						mainBody.applyLinearImpulse(new Vector2(4f, mainBody.getLinearVelocity().y), mainBody.getWorldCenter(), true);
-					} else {
-						mainBody.applyLinearImpulse(new Vector2(4f, 0), mainBody.getWorldCenter(), true);
-					}
-				}
-//				image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
-//				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
-//				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
-//				System.out.println(String.format("v: %s", mainBody.getLinearVelocity()));
-			}
-
-			@Override
-			public void onTouchLeft(int pointer) {
-				if (Math.abs(mainBody.getLinearVelocity().x) < 32) {
-					if (mainBody.getLinearVelocity().y != 0) {
-//						mainBody.applyLinearImpulse(new Vector2(-4f, mainBody.getLinearVelocity().y), mainBody.getWorldCenter(), true);
-					} else {
-						mainBody.applyLinearImpulse(new Vector2(-4f, 0), mainBody.getWorldCenter(), true);
-					}
-				}
-
-//				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
-//				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
-			}
-
-            @Override
-            public void onJump(int pointer) {
-				if (mainBody.getLinearVelocity().y == 0) {
-					Vector2 v = mainBody.getLinearVelocity();
-					v.y = 64f;
-					mainBody.applyLinearImpulse(v, mainBody.getWorldCenter(), true);
-//	                mainBody.applyLinearImpulse(new Vector2(0, 20000f), mainBody.getWorldCenter(), true);
-				}
-            }
-        });
+//		arror.addTouchListener(new UserController.TouchListener() {
+//			@Override
+//			public void onTouchRight(int pointer) {
+//				if (Math.abs(mainBody.getLinearVelocity().x) < 32) {
+//					if (mainBody.getLinearVelocity().y != 0) {
+////						mainBody.applyLinearImpulse(new Vector2(4f, mainBody.getLinearVelocity().y), mainBody.getWorldCenter(), true);
+//					} else {
+//						mainBody.applyLinearImpulse(new Vector2(4f, 0), mainBody.getWorldCenter(), true);
+//					}
+//				}
+////				image.addAction(Actions.moveTo(mainBody.getPosition().x, mainBody.getPosition().y));
+////				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
+////				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
+////				System.out.println(String.format("v: %s", mainBody.getLinearVelocity()));
+//			}
+//
+//			@Override
+//			public void onTouchLeft(int pointer) {
+//				if (Math.abs(mainBody.getLinearVelocity().x) < 32) {
+//					if (mainBody.getLinearVelocity().y != 0) {
+////						mainBody.applyLinearImpulse(new Vector2(-4f, mainBody.getLinearVelocity().y), mainBody.getWorldCenter(), true);
+//					} else {
+//						mainBody.applyLinearImpulse(new Vector2(-4f, 0), mainBody.getWorldCenter(), true);
+//					}
+//				}
+//
+////				System.out.println(String.format("mainBody position: (%s, %s)", mainBody.getPosition().x, mainBody.getPosition().y));
+////				image.setPosition(mainBody.getPosition().x, mainBody.getPosition().y);
+//			}
+//
+//            @Override
+//            public void onJump(int pointer) {
+//				if (mainBody.getLinearVelocity().y == 0) {
+//					Vector2 v = mainBody.getLinearVelocity();
+//					v.y = 64f;
+//					mainBody.applyLinearImpulse(v, mainBody.getWorldCenter(), true);
+////	                mainBody.applyLinearImpulse(new Vector2(0, 20000f), mainBody.getWorldCenter(), true);
+//				}
+//            }
+//        });
 	}
 
 	@Override

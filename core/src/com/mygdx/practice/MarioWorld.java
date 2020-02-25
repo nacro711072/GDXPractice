@@ -27,6 +27,7 @@ import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioState;
 import com.mygdx.practice.util.ZoomHelper;
+import com.mygdx.practice.wrapper.MultiContactListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,8 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
 
     private Mario mario;
     private List<Character> characters = new ArrayList<>();
+    private MultiContactListener contactListeners = new MultiContactListener();
+
 
     MarioWorld(World world, ZoomHelper zoomHelper, String path) {
         this.world = world;
@@ -54,34 +57,9 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
 
         mario = new Mario(world, CharacterId.Mario);
         characters.add(mario);
+        contactListeners.addContactListener(mario);
 
-        world.setContactListener(new ContactListener() {
-            @Override
-            public void beginContact(Contact contact) {
-                FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
-                FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
-                if (dataA != null && dataA.type.equals("mario_foot")) {
-                    ((MarioBodyData) contact.getFixtureA().getBody().getUserData()).changeState(MarioState.STAND);
-                } else if (dataB != null && dataB.type.equals("mario_foot")) {
-                    ((MarioBodyData) contact.getFixtureB().getBody().getUserData()).changeState(MarioState.STAND);
-                }
-            }
-
-            @Override
-            public void endContact(Contact contact) {
-
-            }
-
-            @Override
-            public void preSolve(Contact contact, Manifold oldManifold) {
-
-            }
-
-            @Override
-            public void postSolve(Contact contact, ContactImpulse impulse) {
-
-            }
-        });
+        world.setContactListener(contactListeners);
     }
 
     private void createMap(String path) {

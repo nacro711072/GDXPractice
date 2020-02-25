@@ -6,18 +6,20 @@ public class MarioBodyData {
     private MarioState preState = MarioState.JUMP;
 
     public void changeState(MarioState newState) {
-        if (state == MarioState.STAND) {
-            preState = state;
-            state = newState;
-        } else if (state == MarioState.JUMP && newState == MarioState.STAND) {
-            preState = state;
-            state = newState;
-        } else if (state == MarioState.RUN) {
-            preState = state;
-            state = newState;
-        } else if (state == MarioState.SQUAT && (newState == MarioState.STAND || newState == MarioState.JUMP)) {
-            preState = state;
-            state = newState;
+        synchronized (this) {
+            if (state == MarioState.STAND) {
+                preState = state;
+                state = newState;
+            } else if (state == MarioState.JUMP && newState == MarioState.STAND) {
+                preState = state;
+                state = newState;
+            } else if (state == MarioState.RUN) {
+                preState = state;
+                state = newState;
+            } else if (state == MarioState.SQUAT && (newState == MarioState.STAND || newState == MarioState.JUMP)) {
+                preState = state;
+                state = newState;
+            }
         }
     }
 

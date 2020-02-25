@@ -9,8 +9,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -26,7 +31,8 @@ import java.util.List;
 /**
  * Nick, 2020-02-13
  */
-public class Mario implements Character, UserController.TouchListener {
+public class Mario implements Character,
+        UserController.TouchListener, ContactListener {
     private MarioWorld.CharacterId id;
     private Body body;
     private MarioBodyData bodyData;
@@ -55,7 +61,7 @@ public class Mario implements Character, UserController.TouchListener {
 
         this.id = id;
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.18f, 0.33f);
+        shape.setAsBox(0.18f, 0.36f);
 
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
@@ -75,10 +81,12 @@ public class Mario implements Character, UserController.TouchListener {
         Fixture marioBodyF = body.createFixture(fdef);
         marioBodyF.setUserData(new FixtureUserData("mario_body"));
 
-        shape.setAsBox(0.16f, 0.1f, new Vector2(0, -0.33f), 0);
+        shape.setAsBox(0.12f, 0.05f, new Vector2(0, -0.36f), 0);
         Fixture f = body.createFixture(fdef);
         FixtureUserData footUserData = new FixtureUserData("mario_foot");
         f.setUserData(footUserData);
+        f.setSensor(true);
+
     }
 
     @Override
@@ -118,9 +126,7 @@ public class Mario implements Character, UserController.TouchListener {
                 TextureRegion textureRegion = runAnimation.getKeyFrame(animationState, true);
                 batch.draw(textureRegion,
                         x, y,
-                        p.x, p.y,
-                        w, h,
-                        1, 1, 0f
+                        w, h
                 );
                 break;
             case JUMP:
@@ -129,7 +135,7 @@ public class Mario implements Character, UserController.TouchListener {
 
             case STAND:
             default:
-                batch.draw(marioStandTexture, x, y, p.x, p.y, w, h, 1, 1, 0f);
+                batch.draw(marioStandTexture, x, y, w, h);
                 break;
         }
 //        if (userData.faceRight) {
@@ -198,5 +204,34 @@ public class Mario implements Character, UserController.TouchListener {
         if (userData.getState() != MarioState.JUMP) {
             userData.changeState(MarioState.STAND);
         }
+    }
+
+    @Override
+    public void beginContact(Contact contact) {
+        Gdx.app.log("mario", "beginContact");
+        FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
+        FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
+        if (dataA != null && dataA.type.equals("mario_foot")) {
+            Gdx.app.log("mario", "beginContact, mario_foot");
+            ((MarioBodyData) contact.getFixtureA().getBody().getUserData()).changeState(MarioState.STAND);
+        } else if (dataB != null && dataB.type.equals("mario_foot")) {
+            Gdx.app.log("mario", "beginContact, mario_foot");
+            ((MarioBodyData) contact.getFixtureB().getBody().getUserData()).changeState(MarioState.STAND);
+        }
+    }
+
+    @Override
+    public void endContact(Contact contact) {
+
+    }
+
+    @Override
+    public void preSolve(Contact contact, Manifold oldManifold) {
+
+    }
+
+    @Override
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+
     }
 }

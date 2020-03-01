@@ -9,8 +9,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -18,6 +22,7 @@ import com.mygdx.practice.MarioWorld;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.MarioBodyData;
+import com.mygdx.practice.model.MarioFootData;
 import com.mygdx.practice.model.MarioState;
 import com.mygdx.practice.util.ZoomHelper;
 
@@ -26,10 +31,13 @@ import java.util.List;
 /**
  * Nick, 2020-02-13
  */
-public class Mario implements Character, UserController.TouchListener {
+public class Mario implements Character,
+        UserController.TouchListener,
+        ContactListener {
     private MarioWorld.CharacterId id;
     private Body body;
     private MarioBodyData bodyData;
+    private MarioFootData footUserData;
     private List<Fixture> fixtures;
 
     private Texture marioSheet;
@@ -55,7 +63,7 @@ public class Mario implements Character, UserController.TouchListener {
 
         this.id = id;
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.18f, 0.33f);
+        shape.setAsBox(0.18f, 0.38f);
 
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
@@ -75,10 +83,11 @@ public class Mario implements Character, UserController.TouchListener {
         Fixture marioBodyF = body.createFixture(fdef);
         marioBodyF.setUserData(new FixtureUserData("mario_body"));
 
-        shape.setAsBox(0.16f, 0.1f, new Vector2(0, -0.33f), 0);
+        shape.setAsBox(0.16f, 0.001f, new Vector2(0, -0.38f), 0);
         Fixture f = body.createFixture(fdef);
-        FixtureUserData footUserData = new FixtureUserData("mario_foot");
+        footUserData = new MarioFootData("mario_foot");
         f.setUserData(footUserData);
+        f.setSensor(true);
     }
 
     @Override
@@ -94,6 +103,24 @@ public class Mario implements Character, UserController.TouchListener {
     @Override
     public List<Fixture> getFixtures() {
         return fixtures;
+    }
+
+    public void preRender() {
+        if (!footUserData.hasContactTarget() && body.getLinearVelocity().y <= 0) {
+            Gdx.app.log("mario", "has No Contact, mario state: " + bodyData.getState());
+            bodyData.changeState(MarioState.FALLING);
+        } else {
+            Gdx.app.log("mario", "hasContact, mario state: " + bodyData.getState());
+            // TODO: 2020-02-29  
+            if ((bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) && body.getLinearVelocity().y <= 0) {
+                bodyData.changeState(MarioState.STAND);
+            }
+        }
+//        if (bodyData.getState() == MarioState.RUN) {
+//            if (body.getLinearVelocity().y < -0.1) {
+//                bodyData.changeState(MarioState.FALLING);
+//            }
+//        }
     }
 
     @Override
@@ -159,44 +186,89 @@ public class Mario implements Character, UserController.TouchListener {
 
     @Override
     public void onTouchRight(int pointer) {
-        Body marioBody = body;
-        if (marioBody.getLinearVelocity().x < 0.4) {
-            marioBody.applyLinearImpulse(new Vector2(0.004f, 0), marioBody.getWorldCenter(), true);
-            MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
-            userData.faceRight = true;
-            userData.changeState(MarioState.RUN);
+//        Body marioBody = body;
+        if (body.getLinearVelocity().x < 0.4) {
+            body.applyLinearImpulse(new Vector2(0.004f, 0), body.getWorldCenter(), true);
+//            MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
+            bodyData.faceRight = true;
+            bodyData.changeState(MarioState.RUN);
         }
     }
 
     @Override
     public void onTouchLeft(int pointer) {
-        Body marioBody = body;
-        if (marioBody.getLinearVelocity().x > -0.4) {
-            marioBody.applyLinearImpulse(new Vector2(-0.004f, 0), marioBody.getWorldCenter(), true);
-            MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
-            userData.faceRight = false;
-            userData.changeState(MarioState.RUN);
+//        Body marioBody = body;
+        if (body.getLinearVelocity().x > -0.4) {
+            body.applyLinearImpulse(new Vector2(-0.004f, 0), body.getWorldCenter(), true);
+//            MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
+            bodyData.faceRight = false;
+            bodyData.changeState(MarioState.RUN);
         }
     }
 
     @Override
     public void onJump(int pointer) {
-        Body marioBody = body;
-        MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
+//        Body marioBody = body;
+//        MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
 
-        if (userData.getState() != MarioState.JUMP) {
-            marioBody.applyLinearImpulse(new Vector2(0, 0.4f), marioBody.getWorldCenter(), true);
-            userData.changeState(MarioState.JUMP);
+        Gdx.app.log("mario", "onJump");
+        MarioState marioState = bodyData.getState();
+        if (marioState != MarioState.JUMP && marioState != MarioState.FALLING) {
+            body.applyLinearImpulse(new Vector2(0, 0.4f), body.getWorldCenter(), true);
+            bodyData.changeState(MarioState.JUMP);
         }
     }
 
     @Override
     public void onNoAction() {
-        Body marioBody = body;
-        MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
+//        Body marioBody = body;
+//        MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
 
-        if (userData.getState() != MarioState.JUMP) {
-            userData.changeState(MarioState.STAND);
+        if (bodyData.getState() != MarioState.JUMP) {
+            bodyData.changeState(MarioState.STAND);
         }
+    }
+
+    @Override
+    public void beginContact(Contact contact) {
+        Gdx.app.log("mario", "beginContact");
+        FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
+        FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
+        if (dataA != null && dataA.type.equals("mario_foot")) {
+            ((MarioFootData) dataA).addContact(dataB);
+//            if (bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) {
+//                bodyData.changeState(MarioState.STAND);
+//            }
+        } else if (dataB != null && dataB.type.equals("mario_foot")) {
+            ((MarioFootData) dataB).addContact(dataA);
+//            if (bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) {
+//                bodyData.changeState(MarioState.STAND);
+//            }
+        }
+
+    }
+
+    @Override
+    public void endContact(Contact contact) {
+        Gdx.app.log("mario", "endContact");
+        FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
+        FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
+        if (dataA != null && dataA.type.equals("mario_foot")) {
+            ((MarioFootData) dataA).removeContact(dataB);
+
+        } else if (dataB != null && dataB.type.equals("mario_foot")) {
+            ((MarioFootData) dataB).removeContact(dataA);
+        }
+
+    }
+
+    @Override
+    public void preSolve(Contact contact, Manifold oldManifold) {
+
+    }
+
+    @Override
+    public void postSolve(Contact contact, ContactImpulse impulse) {
+
     }
 }

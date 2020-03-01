@@ -4,5 +4,6 @@ public enum MarioState {
     STAND,
     RUN,
     JUMP,
+    FALLING,
     SQUAT //蹲
 }

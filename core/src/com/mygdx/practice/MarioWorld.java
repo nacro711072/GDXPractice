@@ -55,33 +55,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         mario = new Mario(world, CharacterId.Mario);
         characters.add(mario);
 
-        world.setContactListener(new ContactListener() {
-            @Override
-            public void beginContact(Contact contact) {
-                FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
-                FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
-                if (dataA != null && dataA.type.equals("mario_foot")) {
-                    ((MarioBodyData) contact.getFixtureA().getBody().getUserData()).changeState(MarioState.STAND);
-                } else if (dataB != null && dataB.type.equals("mario_foot")) {
-                    ((MarioBodyData) contact.getFixtureB().getBody().getUserData()).changeState(MarioState.STAND);
-                }
-            }
-
-            @Override
-            public void endContact(Contact contact) {
-
-            }
-
-            @Override
-            public void preSolve(Contact contact, Manifold oldManifold) {
-
-            }
-
-            @Override
-            public void postSolve(Contact contact, ContactImpulse impulse) {
-
-            }
-        });
+        world.setContactListener(mario);
     }
 
     private void createMap(String path) {
@@ -129,7 +103,8 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             shape2 = new PolygonShape();
             shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
             fixtureDef.shape = shape2;
-            body.createFixture(fixtureDef);
+            Fixture fixture = body.createFixture(fixtureDef);
+            fixture.setUserData(new FixtureUserData("brick"));
         }
 
         mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel());
@@ -143,6 +118,10 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             }
         }
         return null;
+    }
+
+    public void preRender() {
+        mario.preRender();
     }
 
     public void render(OrthographicCamera camera) {

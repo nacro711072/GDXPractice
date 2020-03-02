@@ -59,7 +59,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         characters.add(mario);
         contactListeners.addContactListener(mario);
 
-        world.setContactListener(contactListeners);
+        world.setContactListener(mario);
     }
 
     private void createMap(String path) {
@@ -107,7 +107,8 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             shape2 = new PolygonShape();
             shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
             fixtureDef.shape = shape2;
-            body.createFixture(fixtureDef);
+            Fixture fixture = body.createFixture(fixtureDef);
+            fixture.setUserData(new FixtureUserData("brick"));
         }
 
         mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel());
@@ -121,6 +122,10 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             }
         }
         return null;
+    }
+
+    public void preRender() {
+        mario.preRender();
     }
 
     public void render(OrthographicCamera camera) {

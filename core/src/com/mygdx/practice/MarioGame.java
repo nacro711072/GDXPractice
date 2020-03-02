@@ -36,7 +36,7 @@ public class MarioGame extends ApplicationAdapter {
     @Override
     public void create() {
         marioWorld = new MarioWorld(new World(new Vector2(0,-0.2f), true), zh, "map/test.tmx");
-        stage = new Stage(new ScalingViewport(Scaling.fillX, width / 2, height / 2, camera));
+        stage = new Stage(new ScalingViewport(Scaling.stretch, width / 2, height / 2, camera));
         controller = new UserController("arrow.png", "up.png");
         controller.addTouchListener(marioWorld);
         controller.setCameraViewport(800, 500);
@@ -50,6 +50,7 @@ public class MarioGame extends ApplicationAdapter {
         CameraHelper.lookAt(camera, marioBody.getPosition(), new Vector2(1, 1), cameraBound);
 
         controller.preRender();
+        marioWorld.preRender();
     }
 
     @Override

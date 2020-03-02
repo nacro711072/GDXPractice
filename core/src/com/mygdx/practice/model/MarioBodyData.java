@@ -1,5 +1,7 @@
 package com.mygdx.practice.model;
 
+import com.badlogic.gdx.Gdx;
+
 public class MarioBodyData {
     public boolean faceRight = true; // false: 左, true: 右
     private MarioState state = MarioState.JUMP;
@@ -7,10 +9,14 @@ public class MarioBodyData {
 
     public void changeState(MarioState newState) {
         synchronized (this) {
+
             if (state == MarioState.STAND) {
+                Gdx.app.log("mario", String.format("changeState: stand -> %s", newState));
+
                 preState = state;
                 state = newState;
-            } else if (state == MarioState.JUMP && newState == MarioState.STAND) {
+            } else if ((state == MarioState.JUMP || state == MarioState.FALLING) && newState == MarioState.STAND) {
+                Gdx.app.log("mario", String.format("changeState: jump -> %s", newState));
                 preState = state;
                 state = newState;
             } else if (state == MarioState.RUN) {

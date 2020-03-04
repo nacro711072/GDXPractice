@@ -21,6 +21,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.practice.MarioWorld;
 import com.mygdx.practice.component.UserController;
+import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioFootData;
@@ -81,6 +82,7 @@ public class Mario implements Character,
 
         body = world.createBody(bodyDef);
         body.setUserData(bodyData);
+
         Fixture marioBodyF = body.createFixture(fdef);
         marioBodyF.setUserData(new FixtureUserData("mario_body"));
 
@@ -89,6 +91,11 @@ public class Mario implements Character,
         footUserData = new MarioFootData("mario_foot");
         f.setUserData(footUserData);
         f.setSensor(true);
+
+        shape.setAsBox(0.16f, 0.001f, new Vector2(0, 0.38f), 0);
+        Fixture head = body.createFixture(fdef);
+        head.setUserData(new FixtureUserData("mario_head"));
+        head.setSensor(true);
     }
 
     @Override
@@ -158,19 +165,6 @@ public class Mario implements Character,
                 batch.draw(marioStandTexture, x, y, w, h);
                 break;
         }
-//        if (userData.faceRight) {
-//            batch.draw(marioStandTexture,
-//                    x, y,
-//                    marioStandTexture.getRegionWidth() * zh.scalePixel(), marioStandTexture.getRegionHeight() * zh.scalePixel()
-//            );
-//        } else {
-//            batch.draw(marioStandTexture,
-//                    p.x + zh.scalePixel(marioStandTexture.getRegionWidth() / 2f), p.y - zh.scalePixel(marioStandTexture.getRegionHeight() / 2f),
-//                    p.x, p.y,
-//                    -zh.scalePixel(marioStandTexture.getRegionWidth()), zh.scalePixel(marioStandTexture.getRegionHeight()),
-//                    1, 1,
-//                    0f);
-//        }
         // right
 
         batch.end();
@@ -199,7 +193,6 @@ public class Mario implements Character,
 //        Body marioBody = body;
         if (body.getLinearVelocity().x > -0.4) {
             body.applyLinearImpulse(new Vector2(-0.004f, 0), body.getWorldCenter(), true);
-//            MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
             bodyData.faceRight = false;
             bodyData.changeState(MarioState.RUN);
         }
@@ -207,8 +200,6 @@ public class Mario implements Character,
 
     @Override
     public void onJump(int pointer) {
-//        Body marioBody = body;
-//        MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
 
         Gdx.app.log("mario", "onJump");
         MarioState marioState = bodyData.getState();
@@ -220,9 +211,6 @@ public class Mario implements Character,
 
     @Override
     public void onNoAction() {
-//        Body marioBody = body;
-//        MarioBodyData userData = ((MarioBodyData) marioBody.getUserData());
-
         if (bodyData.getState() != MarioState.JUMP) {
             bodyData.changeState(MarioState.STAND);
         }
@@ -233,18 +221,16 @@ public class Mario implements Character,
         Gdx.app.log("mario", "beginContact");
         FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
         FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
+
         if (dataA != null && dataA.type.equals("mario_foot")) {
             ((MarioFootData) dataA).addContact(dataB);
-//            if (bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) {
-//                bodyData.changeState(MarioState.STAND);
-//            }
         } else if (dataB != null && dataB.type.equals("mario_foot")) {
             ((MarioFootData) dataB).addContact(dataA);
-//            if (bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) {
-//                bodyData.changeState(MarioState.STAND);
-//            }
         }
+        if (dataA == null || dataB == null) return;
 
+        checkBrickContactEvent(dataA, dataB, true);
+        checkBrickContactEvent(dataB, dataA, true);
     }
 
     @Override
@@ -259,6 +245,21 @@ public class Mario implements Character,
             ((MarioFootData) dataB).removeContact(dataA);
         }
 
+        if (dataA == null || dataB == null) return;
+
+        checkBrickContactEvent(dataA, dataB, false);
+        checkBrickContactEvent(dataB, dataA, false);
+
+    }
+
+    private void checkBrickContactEvent(FixtureUserData dataA, FixtureUserData dataB, boolean isContact) {
+        if (dataA.type.equals("brick")) {
+            if (dataB.type.equals("mario_head")) {
+                ((BrickData) dataA).isMarioHeadContact = isContact;
+            } else if (dataB.type.equals("mario_body")) {
+                ((BrickData) dataA).isMarioBodyContact = isContact;
+            }
+        }
     }
 
     @Override

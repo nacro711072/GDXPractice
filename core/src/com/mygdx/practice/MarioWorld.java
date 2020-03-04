@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
@@ -19,10 +20,12 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.practice.character.Character;
 import com.mygdx.practice.character.Mario;
 import com.mygdx.practice.component.UserController;
+import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioState;
@@ -108,7 +111,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
             fixtureDef.shape = shape2;
             Fixture fixture = body.createFixture(fixtureDef);
-            fixture.setUserData(new FixtureUserData("brick"));
+            fixture.setUserData(new BrickData());
         }
 
         mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel());
@@ -126,6 +129,20 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
 
     public void preRender() {
         mario.preRender();
+        Array<Fixture> fixtureArray = new Array<>(world.getBodyCount());
+        world.getFixtures(fixtureArray);
+        for (Fixture fixture: fixtureArray) {
+            if (!(fixture.getUserData() instanceof BrickData)) continue;
+
+            BrickData userData = (BrickData) fixture.getUserData();
+            if (userData != null && userData.isNeedDestory()) {
+                Vector2 p = fixture.getBody().getPosition();
+                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
+                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
+                cell.setTile(null);
+                fixture.getBody().destroyFixture(fixture);
+            }
+        }
     }
 
     public void render(OrthographicCamera camera) {

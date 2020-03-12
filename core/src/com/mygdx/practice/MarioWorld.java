@@ -2,6 +2,7 @@ package com.mygdx.practice;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.Map;
 import com.badlogic.gdx.maps.MapRenderer;
@@ -21,10 +22,12 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.practice.character.Character;
+import com.mygdx.practice.character.Goomba;
 import com.mygdx.practice.character.Mario;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.map.MarioMapWrapper;
 import com.mygdx.practice.model.BrickData;
+import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.util.CameraHelper;
 import com.mygdx.practice.util.ZoomHelper;
 import com.mygdx.practice.wrapper.MultiContactListener;
@@ -58,10 +61,15 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel(), spriteBatch);
 
         mario = new Mario(world);
-        characters.add(mario);
-        contactListeners.addContactListener(mario);
+        Goomba testGoomba = new Goomba(world, new Texture("mario_enemies_bosses_sheet.png"), new Vector2(13, 2));
 
-        world.setContactListener(mario);
+        characters.add(mario);
+        characters.add(testGoomba);
+
+        contactListeners.addContactListener(mario);
+        contactListeners.addContactListener(testGoomba);
+
+        world.setContactListener(contactListeners);
     }
 
     public void setupCameraBound(Rectangle cameraBound) {
@@ -158,6 +166,11 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
     }
 
     public void render(OrthographicCamera camera, SpriteBatch spriteBatch) {
+        MarioBodyData bodyData = ((MarioBodyData) mario.getBody().getUserData());
+        if (bodyData != null && bodyData.isDead) {
+            // TODO: 2020/3/12 先讓他消失, 死掉的動畫在加入蘑菇成長機制之後, 再做死亡動畫
+            world.destroyBody(mario.getBody());
+        }
         world.step(1 / 10f, 8, 3);
 
         mapRender.setView(camera);

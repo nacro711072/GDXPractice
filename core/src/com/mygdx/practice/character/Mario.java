@@ -24,6 +24,7 @@ import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioFootData;
 import com.mygdx.practice.model.MarioState;
+import com.mygdx.practice.model.Death;
 import com.mygdx.practice.util.ZoomHelper;
 
 import java.util.List;
@@ -106,24 +107,21 @@ public class Mario implements Character,
 
     public void preRender() {
         if (!footUserData.hasContactTarget() && body.getLinearVelocity().y <= 0) {
-            Gdx.app.log("mario", "has No Contact, mario state: " + bodyData.getState());
+//            Gdx.app.log("mario", "has No Contact, mario state: " + bodyData.getState());
             bodyData.changeState(MarioState.FALLING);
         } else {
-            Gdx.app.log("mario", "hasContact, mario state: " + bodyData.getState());
-            // TODO: 2020-02-29  
+//            Gdx.app.log("mario", "hasContact, mario state: " + bodyData.getState());
             if ((bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) && body.getLinearVelocity().y <= 0) {
                 bodyData.changeState(MarioState.STAND);
             }
         }
-//        if (bodyData.getState() == MarioState.RUN) {
-//            if (body.getLinearVelocity().y < -0.1) {
-//                bodyData.changeState(MarioState.FALLING);
-//            }
-//        }
     }
 
     @Override
     public void render(Camera camera, ZoomHelper zh, SpriteBatch spriteBatch) {
+        if (bodyData != null && bodyData.isDead) {
+            return;
+        }
         animationState = (bodyData.getState() == bodyData.getPreState() ? animationState + 0.1f : 0.1f);
 //        Gdx.app.log("mario", "animationState: " + animationState);
 
@@ -195,7 +193,7 @@ public class Mario implements Character,
         Gdx.app.log("mario", "onJump");
         MarioState marioState = bodyData.getState();
         if (marioState != MarioState.JUMP && marioState != MarioState.FALLING) {
-            body.applyLinearImpulse(new Vector2(0, 0.4f), body.getWorldCenter(), true);
+            body.applyLinearImpulse(new Vector2(0, 0.3f), body.getWorldCenter(), true);
             bodyData.changeState(MarioState.JUMP);
         }
     }
@@ -209,24 +207,39 @@ public class Mario implements Character,
 
     @Override
     public void beginContact(Contact contact) {
-        Gdx.app.log("mario", "beginContact");
+//        Gdx.app.log("mario", "beginContact");
         FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
         FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
 
         if (dataA != null && dataA.type.equals("mario_foot")) {
             ((MarioFootData) dataA).addContact(dataB);
+            Object otherBodyData = contact.getFixtureB().getBody().getUserData();
+            if (otherBodyData instanceof Death) {
+                ((Death) otherBodyData).dead();
+            }
         } else if (dataB != null && dataB.type.equals("mario_foot")) {
             ((MarioFootData) dataB).addContact(dataA);
+            Object otherBodyData = contact.getFixtureA().getBody().getUserData();
+            if (otherBodyData instanceof Death) {
+                ((Death) otherBodyData).dead();
+            }
         }
         if (dataA == null || dataB == null) return;
 
         checkBrickContactEvent(dataA, dataB, true);
         checkBrickContactEvent(dataB, dataA, true);
+
+        if (dataA.type.equals("monster_face") && dataB.type.equals("mario_body")) {
+            bodyData.isDead = true;
+        } else if (dataB.type.equals("monster_face") && dataA.type.equals("mario_body")) {
+            bodyData.isDead = true;
+        }
+
     }
 
     @Override
     public void endContact(Contact contact) {
-        Gdx.app.log("mario", "endContact");
+//        Gdx.app.log("mario", "endContact");
         FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
         FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
         if (dataA != null && dataA.type.equals("mario_foot")) {
@@ -255,7 +268,6 @@ public class Mario implements Character,
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
-
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -28,29 +29,33 @@ public class MarioGame extends ApplicationAdapter {
     private OrthographicCamera camera = new OrthographicCamera(width, height);
 
     private MarioWorld marioWorld;
-    private Body marioBody;
+    private SpriteBatch spriteBatch;
 
     private Stage stage;
     private ZoomHelper zh = new ZoomHelper(36);
 
     @Override
     public void create() {
-        marioWorld = new MarioWorld(new World(new Vector2(0,-0.2f), true), zh, "map/test.tmx");
-        stage = new Stage(new ScalingViewport(Scaling.stretch, width / 2, height / 2, camera));
+        spriteBatch = new SpriteBatch();
+
+        World world = new World(new Vector2(0,-0.2f), true);
+        marioWorld = new MarioWorld(world, zh, "map/test.tmx", spriteBatch);
+        marioWorld.setupCameraBound(new Rectangle(width / 4f, height / 4f, 180, height / 2f));
+        stage = new Stage(new ScalingViewport(Scaling.stretch, width / 2, height / 2, camera), spriteBatch);
         controller = new UserController("arrow.png", "up.png");
         controller.addTouchListener(marioWorld);
         controller.setCameraViewport(800, 500);
         Gdx.input.setInputProcessor(new InputMultiplexer(controller));
 
-        marioBody = marioWorld.getBodyById(MarioWorld.CharacterId.Mario);
+//        marioBody = marioWorld.getBodyById(MarioWorld.CharacterId.Mario);
     }
 
     private void preRender() {
-        Rectangle cameraBound = new Rectangle(width / 4f, height / 4f, 180, height / 2f);
-        CameraHelper.lookAt(camera, marioBody.getPosition(), new Vector2(1, 1), cameraBound);
+//        Rectangle cameraBound = new Rectangle(width / 4f, height / 4f, 180, height / 2f);
+//        CameraHelper.lookAt(camera, marioBody.getPosition(), new Vector2(1, 1), cameraBound);
 
         controller.preRender();
-        marioWorld.preRender();
+        marioWorld.preRender(camera, new Vector2(1, 1));
     }
 
     @Override
@@ -60,8 +65,8 @@ public class MarioGame extends ApplicationAdapter {
 
         preRender();
 
-        marioWorld.render(camera);
-        controller.render();
+        marioWorld.render(camera, spriteBatch);
+        controller.render(spriteBatch);
 
         stage.act();
         stage.draw();
@@ -74,5 +79,6 @@ public class MarioGame extends ApplicationAdapter {
         marioWorld.dispose();
         stage.dispose();
         controller.dispose();
+        spriteBatch.dispose();
     }
 }

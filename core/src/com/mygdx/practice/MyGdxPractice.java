@@ -194,7 +194,7 @@ public class MyGdxPractice extends ApplicationAdapter {
 		mapRender.setView(camera);
 		mapRender.render();
 
-		arror.render();
+//		arror.render(spriteBatch);
 
 		box2dRender.render(world, camera.combined);
 

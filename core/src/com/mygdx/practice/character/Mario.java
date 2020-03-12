@@ -12,14 +12,12 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.practice.MarioWorld;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.FixtureUserData;
@@ -36,7 +34,6 @@ import java.util.List;
 public class Mario implements Character,
         UserController.TouchListener,
         ContactListener {
-    private MarioWorld.CharacterId id;
     private Body body;
     private MarioBodyData bodyData;
     private MarioFootData footUserData;
@@ -46,12 +43,12 @@ public class Mario implements Character,
     private TextureRegion marioStandTexture;
     private TextureRegion marioJumpTexture;
     private Animation<TextureRegion> runAnimation;
-    private SpriteBatch batch = new SpriteBatch();
+//    private SpriteBatch batch = new SpriteBatch();
 //    private Sprite sprite = new Sprite();
 
     private float animationState = 0.1f;
 
-    public Mario(World world, MarioWorld.CharacterId id) {
+    public Mario(World world) {
         marioSheet = new Texture("mario_sheet.png");
         marioStandTexture = new TextureRegion(marioSheet, 1, 1, 16, 32);
         marioJumpTexture = new TextureRegion(marioSheet, 1 + 5 * 17, 1, 16, 32);
@@ -63,7 +60,6 @@ public class Mario implements Character,
         runAnimation = new Animation<>(1f, tempFrame, Animation.PlayMode.LOOP_PINGPONG);
         tempFrame.clear();
 
-        this.id = id;
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(0.18f, 0.38f);
 
@@ -99,11 +95,6 @@ public class Mario implements Character,
     }
 
     @Override
-    public MarioWorld.CharacterId getId() {
-        return id;
-    }
-
-    @Override
     public Body getBody() {
         return body;
     }
@@ -132,12 +123,12 @@ public class Mario implements Character,
     }
 
     @Override
-    public void render(Camera camera, ZoomHelper zh) {
+    public void render(Camera camera, ZoomHelper zh, SpriteBatch spriteBatch) {
         animationState = (bodyData.getState() == bodyData.getPreState() ? animationState + 0.1f : 0.1f);
 //        Gdx.app.log("mario", "animationState: " + animationState);
 
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
+        spriteBatch.setProjectionMatrix(camera.combined);
+        spriteBatch.begin();
 
         Vector2 p = body.getPosition();
         MarioBodyData userData = (MarioBodyData) body.getUserData();
@@ -151,29 +142,29 @@ public class Mario implements Character,
         switch (bodyData.getState()) {
             case RUN:
                 TextureRegion textureRegion = runAnimation.getKeyFrame(animationState, true);
-                batch.draw(textureRegion,
+                spriteBatch.draw(textureRegion,
                         x, y,
                         w, h
                 );
                 break;
             case JUMP:
-                batch.draw(marioJumpTexture, x, y, w, h);
+                spriteBatch.draw(marioJumpTexture, x, y, w, h);
                 break;
 
             case STAND:
             default:
-                batch.draw(marioStandTexture, x, y, w, h);
+                spriteBatch.draw(marioStandTexture, x, y, w, h);
                 break;
         }
         // right
 
-        batch.end();
+        spriteBatch.end();
 
     }
 
     @Override
     public void dispose() {
-        batch.dispose();
+//        batch.dispose();
         marioSheet.dispose();
     }
 

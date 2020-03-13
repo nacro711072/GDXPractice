@@ -2,8 +2,13 @@ package com.mygdx.practice.model;
 
 import com.badlogic.gdx.Gdx;
 
-public class MarioBodyData {
+public class MarioBodyData implements CharacterLifeState {
     public boolean faceRight = true; // false: 左, true: 右
+
+    private LifeState lifeState = LifeState.ALIVE;
+    private short dyingCount = 0;
+    private static final int UPPER_BOUND_OF_DYING = 10;
+
     private MarioState state = MarioState.JUMP;
     private MarioState preState = MarioState.JUMP;
 
@@ -11,12 +16,12 @@ public class MarioBodyData {
         synchronized (this) {
 
             if (state == MarioState.STAND) {
-                Gdx.app.log("mario", String.format("changeState: stand -> %s", newState));
+//                Gdx.app.log("mario", String.format("changeState: stand -> %s", newState));
 
                 preState = state;
                 state = newState;
             } else if ((state == MarioState.JUMP || state == MarioState.FALLING) && newState == MarioState.STAND) {
-                Gdx.app.log("mario", String.format("changeState: jump -> %s", newState));
+//                Gdx.app.log("mario", String.format("changeState: jump -> %s", newState));
                 preState = state;
                 state = newState;
             } else if (state == MarioState.RUN) {
@@ -35,5 +40,25 @@ public class MarioBodyData {
 
     public MarioState getPreState() {
         return preState;
+    }
+
+    @Override
+    public void changeState(LifeState state) {
+        if (lifeState.isAlive() && state.isDying()) {
+            lifeState = state;
+        }
+    }
+
+    public void addDyingCountIfDying() {
+        if (getLifeState().isDying()) {
+            if (++dyingCount ==  UPPER_BOUND_OF_DYING) {
+                lifeState = LifeState.DEAD;
+            }
+        }
+    }
+
+    @Override
+    public LifeState getLifeState() {
+        return lifeState;
     }
 }

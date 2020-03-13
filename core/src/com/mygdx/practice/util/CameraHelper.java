@@ -10,9 +10,10 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
  * Nick, 2020-02-06
  */
 public class CameraHelper {
-    public static void lookAt(Camera camera, Vector2 target, Vector2 panRange, Rectangle cameraBound) {
-        float diffX = target.x - camera.position.x;
-        float diffY = target.y - camera.position.y;
+    public static void lookAt(Camera camera, Vector2 targetPosition, Vector2 panRange, Rectangle cameraBound) {
+        if (camera == null || targetPosition == null || panRange == null) return;
+        float diffX = targetPosition.x - camera.position.x;
+        float diffY = targetPosition.y - camera.position.y;
         float moveX = 0;
         float moveY = 0;
 //        Gdx.app.log("cameraHelper", String.format("camera: (%s, %s), target: (%s, %s)", camera.position.x, camera.position.y, target.x, target.y));

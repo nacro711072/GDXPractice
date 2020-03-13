@@ -16,12 +16,12 @@ public class MarioBodyData implements CharacterLifeState {
         synchronized (this) {
 
             if (state == MarioState.STAND) {
-//                Gdx.app.log("mario", String.format("changeState: stand -> %s", newState));
+                Gdx.app.log("mario", String.format("changeState: stand -> %s", newState));
 
                 preState = state;
                 state = newState;
             } else if ((state == MarioState.JUMP || state == MarioState.FALLING) && newState == MarioState.STAND) {
-//                Gdx.app.log("mario", String.format("changeState: jump -> %s", newState));
+                Gdx.app.log("mario", String.format("changeState: jump -> %s", newState));
                 preState = state;
                 state = newState;
             } else if (state == MarioState.RUN) {

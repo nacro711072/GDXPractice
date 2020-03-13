@@ -51,6 +51,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
     private Mario mario;
     private Rectangle cameraBound;
     private List<Character> characters = new LinkedList<>();
+    private List<Brick> bricks = new LinkedList<>();
     private MultiContactListener contactListeners = new MultiContactListener();
 
 
@@ -111,19 +112,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         }
 // brick
         for (RectangleMapObject mapObj: map.getLayers().get(4).getObjects().getByType(RectangleMapObject.class)) {
-            rect = mapObj.getRectangle();
-            bdef = new BodyDef();
-            bdef.type = BodyDef.BodyType.StaticBody;
-            bdef.position.set(zh.scalePixel(rect.getX() + rect.getWidth() / 2), zh.scalePixel(rect.getY() + rect.getHeight() / 2));
-
-            body = world.createBody(bdef);
-            fixtureDef = new FixtureDef();
-            fixtureDef.friction = 0f;
-            shape2 = new PolygonShape();
-            shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
-            fixtureDef.shape = shape2;
-            Fixture fixture = body.createFixture(fixtureDef);
-            fixture.setUserData(new BrickData(mapObj.getProperties()));
+            bricks.add(new Brick(world, map, mapObj, zh));
         }
         return map;
     }
@@ -151,30 +140,34 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             mario.preRender();
         }
 
-        Array<Fixture> fixtureArray = new Array<>(world.getFixtureCount());
-        world.getFixtures(fixtureArray);
-        for (Fixture fixture: fixtureArray) {
-            if (!(fixture.getUserData() instanceof BrickData)) continue;
-
-            BrickData userData = (BrickData) fixture.getUserData();
-            if (userData != null && userData.isMarioHitBrick()) {
-                Vector2 p = fixture.getBody().getPosition();
-                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
-                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
-
-                if (userData.isBreakable()) {
-                    cell.setTile(null);
-                    fixture.getBody().destroyFixture(fixture);
-                    continue;
-                }
-
-                Integer type = userData.getProperties().get("type", Integer.class);
-                if (type == 2) {
-                    cell.setTile(map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK));
-                    fixture.setUserData(null);
-                }
-            }
+        for (Brick brick : bricks) {
+            brick.preRender();
         }
+
+//        Array<Fixture> fixtureArray = new Array<>(world.getFixtureCount());
+//        world.getFixtures(fixtureArray);
+//        for (Fixture fixture: fixtureArray) {
+//            if (!(fixture.getUserData() instanceof BrickData)) continue;
+//
+//            BrickData userData = (BrickData) fixture.getUserData();
+//            if (userData != null && userData.isMarioHitBrick()) {
+//                Vector2 p = fixture.getBody().getPosition();
+//                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
+//                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
+//
+//                if (userData.isBreakable()) {
+//                    cell.setTile(null);
+//                    fixture.getBody().destroyFixture(fixture);
+//                    continue;
+//                }
+//
+//                Integer type = userData.getProperties().get("type", Integer.class);
+//                if (type == 2) {
+//                    cell.setTile(map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK));
+//                    fixture.setUserData(null);
+//                }
+//            }
+//        }
     }
 
     public void render(OrthographicCamera camera, SpriteBatch spriteBatch) {

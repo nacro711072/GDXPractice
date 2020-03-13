@@ -86,14 +86,21 @@ public class Goomba implements Character, ContactListener {
 
     @Override
     public void render(Camera camera, ZoomHelper zh, SpriteBatch spriteBatch) {
+        if (bodyData == null) return;
+
         animationState += 0.1f;
 
-        if (bodyData.isDead()) {
+        if (!bodyData.getLifeState().isAlive()) {
             body.setLinearVelocity(new Vector2(0, 0));
+            bodyData.addDyingCountIfDying();
         } else if (bodyData.faceRight) {
             body.setLinearVelocity(new Vector2(0.1f, 0));
         } else {
             body.setLinearVelocity(new Vector2(-0.1f, 0));
+        }
+
+        if (bodyData.getLifeState().isDead()) {
+            return;
         }
 
         spriteBatch.setProjectionMatrix(camera.combined);
@@ -105,7 +112,7 @@ public class Goomba implements Character, ContactListener {
         float x = p.x - (bodyData.faceRight ? 1 : -1) * zh.scalePixel(deadTexture.getRegionWidth()) / 2f;
         float y = p.y - zh.scalePixel(deadTexture.getRegionHeight()) / 2f;
 
-        if (bodyData.isDead()) {
+        if (bodyData.getLifeState().isDying()) {
             spriteBatch.draw(deadTexture, x, y, w, h);
         } else {
             spriteBatch.draw(runAnimation.getKeyFrame(animationState, true), x, y, w, h);
@@ -155,5 +162,15 @@ public class Goomba implements Character, ContactListener {
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
 
+    }
+
+    @Override
+    public void changeState(LifeState state) {
+        bodyData.changeState(state);
+    }
+
+    @Override
+    public LifeState getLifeState() {
+        return bodyData.getLifeState();
     }
 }

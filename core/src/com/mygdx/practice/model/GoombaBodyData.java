@@ -3,17 +3,30 @@ package com.mygdx.practice.model;
 /**
  * Nick, 2020/3/12
  */
-public class GoombaBodyData implements Death {
+public class GoombaBodyData implements CharacterLifeState {
     public boolean faceRight = false; // false: 左, true: 右
-    private boolean hasDead = false;
+
+    private int dyingCount = 0;
+    private static final int UPPER_BOUND_OF_DYING = 10;
+    private CharacterLifeState.LifeState lifeState = LifeState.ALIVE;
+
 
     @Override
-    public void dead() {
-        hasDead = true;
+    public void changeState(LifeState state) {
+        if (lifeState == LifeState.ALIVE && state == LifeState.DYING) {
+            lifeState = state;
+        }
     }
 
     @Override
-    public boolean isDead() {
-        return hasDead;
+    public LifeState getLifeState() {
+        return lifeState;
+    }
+
+    public void addDyingCountIfDying() {
+        if (lifeState != LifeState.DYING) return;
+        if (++dyingCount >= UPPER_BOUND_OF_DYING) {
+            lifeState = LifeState.DEAD;
+        }
     }
 }

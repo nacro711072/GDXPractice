@@ -33,6 +33,7 @@ import com.mygdx.practice.util.ZoomHelper;
 import com.mygdx.practice.wrapper.MultiContactListener;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -49,7 +50,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
 
     private Mario mario;
     private Rectangle cameraBound;
-    private List<Character> characters = new ArrayList<>();
+    private List<Character> characters = new LinkedList<>();
     private MultiContactListener contactListeners = new MultiContactListener();
 
 
@@ -137,8 +138,19 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
 //    }
 
     public void preRender(Camera camera, Vector2 panRange) {
-        CameraHelper.lookAt(camera, mario.getBody().getPosition(), panRange, cameraBound);
-        mario.preRender();
+        for (Character character: characters) {
+            if (character.getLifeState().isDead()) {
+                world.destroyBody(character.getBody());
+                characters.remove(character);
+                character.dispose();
+            }
+        }
+
+        if (mario.getBody() != null) {
+            CameraHelper.lookAt(camera, mario.getBody().getPosition(), panRange, cameraBound);
+            mario.preRender();
+        }
+
         Array<Fixture> fixtureArray = new Array<>(world.getFixtureCount());
         world.getFixtures(fixtureArray);
         for (Fixture fixture: fixtureArray) {
@@ -166,11 +178,6 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
     }
 
     public void render(OrthographicCamera camera, SpriteBatch spriteBatch) {
-        MarioBodyData bodyData = ((MarioBodyData) mario.getBody().getUserData());
-        if (bodyData != null && bodyData.isDead) {
-            // TODO: 2020/3/12 先讓他消失, 死掉的動畫在加入蘑菇成長機制之後, 再做死亡動畫
-            world.destroyBody(mario.getBody());
-        }
         world.step(1 / 10f, 8, 3);
 
         mapRender.setView(camera);

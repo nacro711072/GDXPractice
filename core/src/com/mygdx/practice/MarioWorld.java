@@ -4,9 +4,9 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.Map;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -15,24 +15,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.practice.character.Character;
 import com.mygdx.practice.character.Goomba;
 import com.mygdx.practice.character.Mario;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.map.MarioMapWrapper;
-import com.mygdx.practice.model.BrickData;
-import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.util.CameraHelper;
 import com.mygdx.practice.util.ZoomHelper;
 import com.mygdx.practice.wrapper.MultiContactListener;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -112,7 +107,11 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         }
 // brick
         for (RectangleMapObject mapObj: map.getLayers().get(4).getObjects().getByType(RectangleMapObject.class)) {
-            bricks.add(new Brick(world, map, mapObj, zh));
+            rect = mapObj.getRectangle();
+            TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
+            TiledMapTileLayer.Cell cell = layer.getCell((int) ((rect.getX() + rect.getWidth() / 2) / 16), (int) ((rect.getY() + rect.getHeight() / 2) / 16));
+
+            bricks.add(new Brick(world, mapObj, cell, zh));
         }
         return map;
     }
@@ -140,8 +139,34 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             mario.preRender();
         }
 
-        for (Brick brick : bricks) {
-            brick.preRender();
+//        Array<Fixture> fixtureArray = new Array<>(world.getFixtureCount());
+//        world.getFixtures(fixtureArray);
+        for (Brick brick: bricks) {
+            brick.preRender(new Brick.PreRenderCallback() {
+                @Override
+                public TiledMapTile getMapTileWithType(int type) {
+                    return map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK);
+                }
+            });
+//            BrickData userData = brick.getBrickData();
+//            if (userData != null && userData.isMarioHitBrick()) {
+////                Vector2 p = fixture.getBody().getPosition();
+////                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
+////                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
+//
+//                if (userData.isBreakable()) {
+//                    brick.setTile(null);
+////                    cell.setTile(null);
+////                    fixture.getBody().destroyFixture(fixture);
+//                    continue;
+//                }
+//
+//                Integer type = userData.getProperties().get("type", Integer.class);
+//                if (type == 2) {
+//                    brick.setTile(map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK));
+////                    fixture.setUserData(null);
+//                }
+//            }
         }
 
 //        Array<Fixture> fixtureArray = new Array<>(world.getFixtureCount());

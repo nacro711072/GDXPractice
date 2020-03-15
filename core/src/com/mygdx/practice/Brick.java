@@ -4,15 +4,12 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.mygdx.practice.map.MarioMapWrapper;
 import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.util.ZoomHelper;
 
@@ -23,20 +20,12 @@ public class Brick {
     private Body body;
     private BrickData brickData;
     private TiledMapTileLayer.Cell cell;
-    private TiledMapTile tile;
 
-    public Brick(World world, MarioMapWrapper map, RectangleMapObject mapObj, ZoomHelper zh) {
-        Rectangle rect = mapObj.getRectangle();
-        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
-
-        this.cell = layer.getCell((int) ((rect.getX() + rect.getWidth() / 2) / 16), (int) ((rect.getY() + rect.getHeight() / 2) / 16));
+    public Brick(World world, RectangleMapObject mapObj, TiledMapTileLayer.Cell cell, ZoomHelper zh) {
         brickData = new BrickData(mapObj.getProperties());
+        this.cell = cell;
 
-        Integer type = brickData.getProperties().get("type", Integer.class);
-        if (type == 2) {
-            tile = map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK);
-        }
-
+        Rectangle rect = mapObj.getRectangle();
 
         BodyDef bdef = new BodyDef();
         bdef.type = BodyDef.BodyType.StaticBody;
@@ -44,28 +33,45 @@ public class Brick {
 
         body = world.createBody(bdef);
 
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
+        PolygonShape shape2 = new PolygonShape();
+        shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.friction = 0f;
-        fixtureDef.shape = shape;
+        fixtureDef.shape = shape2;
 
         Fixture fixture = body.createFixture(fixtureDef);
         fixture.setUserData(brickData);
     }
 
-    public void preRender() {
-        BrickData userData = brickData;
-        if (userData != null && userData.isMarioHitBrick()) {
+    private void setTile(TiledMapTile tile) {
+        cell.setTile(tile);
+        if (tile == null) {
+            body.getWorld().destroyBody(body);
+        }
+    }
 
-            if (userData.isBreakable()) {
-                cell.setTile(null);
-                body.getWorld().destroyBody(body);
+    public void preRender(PreRenderCallback callback) {
+        if (brickData != null && brickData.isMarioHitBrick()) {
+//                Vector2 p = fixture.getBody().getPosition();
+//                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
+//                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
+
+            if (brickData.isBreakable()) {
+                setTile(null);
+//                    cell.setTile(null);
+//                    fixture.getBody().destroyFixture(fixture);
                 return;
             }
-            cell.setTile(tile);
+
+            Integer type = brickData.getProperties().get("type", Integer.class);
+            setTile(callback.getMapTileWithType(type));
         }
 
     }
+
+    public interface PreRenderCallback {
+        TiledMapTile getMapTileWithType(int type);
+    }
+
 }

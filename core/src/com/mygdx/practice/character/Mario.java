@@ -81,13 +81,13 @@ public class Mario implements Character,
         Fixture marioBodyF = body.createFixture(fdef);
         marioBodyF.setUserData(new FixtureUserData("mario_body"));
 
-        shape.setAsBox(0.175f, 0.001f, new Vector2(0, -0.38f), 0);
+        shape.setAsBox(0.179f, 0.001f, new Vector2(0, -0.38f), 0);
         Fixture f = body.createFixture(fdef);
         footUserData = new MarioFootData("mario_foot");
         f.setUserData(footUserData);
         f.setSensor(true);
 
-        shape.setAsBox(0.175f, 0.001f, new Vector2(0, 0.38f), 0);
+        shape.setAsBox(0.09f, 0.001f, new Vector2(0, 0.38f), 0);
         Fixture head = body.createFixture(fdef);
         head.setUserData(new FixtureUserData("mario_head"));
         head.setSensor(true);
@@ -106,7 +106,7 @@ public class Mario implements Character,
     public void preRender() {
         if (bodyData == null || body == null) return;
 
-        if (!footUserData.hasContactTarget() && body.getLinearVelocity().y < -0.000001f) {
+        if (!footUserData.hasContactTarget() && body.getLinearVelocity().y <= 0) {
             bodyData.changeState(MarioState.FALLING);
         } else {
             if ((bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) && body.getLinearVelocity().y <= 0) {

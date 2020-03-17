@@ -14,6 +14,10 @@ public class MarioBodyData implements CharacterLifeState {
 
     public void changeState(MarioState newState) {
         synchronized (this) {
+            if (getState() == newState) {
+                preState = state;
+                return;
+            }
 
             if (state == MarioState.STAND) {
                 Gdx.app.log("mario", String.format("changeState: stand -> %s", newState));

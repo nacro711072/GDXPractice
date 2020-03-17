@@ -1,6 +1,5 @@
 package com.mygdx.practice.character;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -106,13 +105,19 @@ public class Mario implements Character,
     public void preRender() {
         if (bodyData == null || body == null) return;
 
-        if (!footUserData.hasContactTarget() && body.getLinearVelocity().y <= 0) {
-            bodyData.changeState(MarioState.FALLING);
-        } else {
-            if ((bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) && body.getLinearVelocity().y <= 0) {
-                bodyData.changeState(MarioState.STAND);
-            }
+//        if (!footUserData.hasContactTarget() && body.getLinearVelocity().y <= 0) {
+//            Gdx.app.log("mario", "changeState: to falling");
+//            bodyData.changeState(MarioState.FALLING);
+//        } else {
+        if (footUserData.hasContactTarget() &&
+                (bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) &&
+                (body.getLinearVelocity().y <= 0.000001f || body.getLinearVelocity().y >= -0.000001f)) {
+            bodyData.changeState(MarioState.STAND);
         }
+        if (body.getLinearVelocity().y > 0.000001f) {
+            bodyData.changeState(MarioState.JUMP);
+        }
+//        }
         if (bodyData.getLifeState().isDying()) {
             bodyData.addDyingCountIfDying();
         }
@@ -130,7 +135,6 @@ public class Mario implements Character,
 
         Vector2 p = body.getPosition();
         MarioBodyData userData = (MarioBodyData) body.getUserData();
-//        sprite.setRegion(textureRegion);
         float w = zh.scalePixel(marioStandTexture.getRegionWidth()) * (userData.faceRight ? 1 : -1);
         float h = zh.scalePixel(marioStandTexture.getRegionHeight());
         float x = p.x - (userData.faceRight ? 1 : -1) * zh.scalePixel(marioStandTexture.getRegionWidth()) / 2f;
@@ -170,9 +174,9 @@ public class Mario implements Character,
         if (body == null || bodyData == null) return;
         if (body.getLinearVelocity().x < 0.4) {
             body.applyLinearImpulse(new Vector2(0.004f, 0), body.getWorldCenter(), true);
-            bodyData.faceRight = true;
-            bodyData.changeState(MarioState.RUN);
         }
+        bodyData.faceRight = true;
+        bodyData.changeState(MarioState.RUN);
     }
 
     @Override
@@ -180,9 +184,9 @@ public class Mario implements Character,
         if (body == null || bodyData == null) return;
         if (body.getLinearVelocity().x > -0.4) {
             body.applyLinearImpulse(new Vector2(-0.004f, 0), body.getWorldCenter(), true);
-            bodyData.faceRight = false;
-            bodyData.changeState(MarioState.RUN);
         }
+        bodyData.faceRight = false;
+        bodyData.changeState(MarioState.RUN);
     }
 
     @Override
@@ -192,7 +196,6 @@ public class Mario implements Character,
         MarioState marioState = bodyData.getState();
         if (marioState != MarioState.JUMP && marioState != MarioState.FALLING) {
             body.applyLinearImpulse(new Vector2(0, 0.3f), body.getWorldCenter(), true);
-            bodyData.changeState(MarioState.JUMP);
         }
     }
 
@@ -254,7 +257,6 @@ public class Mario implements Character,
         FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
         if (dataA != null && dataA.type.equals("mario_foot")) {
             ((MarioFootData) dataA).removeContact(dataB);
-
         } else if (dataB != null && dataB.type.equals("mario_foot")) {
             ((MarioFootData) dataB).removeContact(dataA);
         }

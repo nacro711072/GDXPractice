@@ -116,15 +116,6 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         return map;
     }
 
-//    public Body getBodyById(CharacterId id) {
-//        for (Character character: characters) {
-//            if (character.getId() == id) {
-//                return character.getBody();
-//            }
-//        }
-//        return null;
-//    }
-
     public void preRender(Camera camera, Vector2 panRange) {
         for (Character character: characters) {
             if (character.getLifeState().isDead()) {
@@ -139,8 +130,6 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             mario.preRender();
         }
 
-//        Array<Fixture> fixtureArray = new Array<>(world.getFixtureCount());
-//        world.getFixtures(fixtureArray);
         for (Brick brick: bricks) {
             brick.preRender(new Brick.PreRenderCallback() {
                 @Override
@@ -148,51 +137,8 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
                     return map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK);
                 }
             });
-//            BrickData userData = brick.getBrickData();
-//            if (userData != null && userData.isMarioHitBrick()) {
-////                Vector2 p = fixture.getBody().getPosition();
-////                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
-////                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
-//
-//                if (userData.isBreakable()) {
-//                    brick.setTile(null);
-////                    cell.setTile(null);
-////                    fixture.getBody().destroyFixture(fixture);
-//                    continue;
-//                }
-//
-//                Integer type = userData.getProperties().get("type", Integer.class);
-//                if (type == 2) {
-//                    brick.setTile(map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK));
-////                    fixture.setUserData(null);
-//                }
-//            }
         }
 
-//        Array<Fixture> fixtureArray = new Array<>(world.getFixtureCount());
-//        world.getFixtures(fixtureArray);
-//        for (Fixture fixture: fixtureArray) {
-//            if (!(fixture.getUserData() instanceof BrickData)) continue;
-//
-//            BrickData userData = (BrickData) fixture.getUserData();
-//            if (userData != null && userData.isMarioHitBrick()) {
-//                Vector2 p = fixture.getBody().getPosition();
-//                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
-//                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
-//
-//                if (userData.isBreakable()) {
-//                    cell.setTile(null);
-//                    fixture.getBody().destroyFixture(fixture);
-//                    continue;
-//                }
-//
-//                Integer type = userData.getProperties().get("type", Integer.class);
-//                if (type == 2) {
-//                    cell.setTile(map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK));
-//                    fixture.setUserData(null);
-//                }
-//            }
-//        }
     }
 
     public void render(OrthographicCamera camera, SpriteBatch spriteBatch) {

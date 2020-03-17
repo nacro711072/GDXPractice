@@ -53,14 +53,8 @@ public class Brick {
 
     public void preRender(PreRenderCallback callback) {
         if (brickData != null && brickData.isMarioHitBrick()) {
-//                Vector2 p = fixture.getBody().getPosition();
-//                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
-//                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
-
             if (brickData.isBreakable()) {
                 setTile(null);
-//                    cell.setTile(null);
-//                    fixture.getBody().destroyFixture(fixture);
                 return;
             }
 

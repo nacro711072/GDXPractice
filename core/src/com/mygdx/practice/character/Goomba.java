@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Nick, 2020/3/12
  */
-public class Goomba implements Character, ContactListener {
+public class Goomba implements Character {
     private Animation<TextureRegion> runAnimation;
     private TextureRegion deadTexture;
     private float animationState = 0.1f;
@@ -126,43 +126,43 @@ public class Goomba implements Character, ContactListener {
 
     }
 
-    @Override
-    public void beginContact(Contact contact) {
-        FixtureUserData userDataA = (FixtureUserData) contact.getFixtureA().getUserData();
-        FixtureUserData userDataB = (FixtureUserData) contact.getFixtureB().getUserData();
-        if (userDataA == null || userDataB == null) return;
-
-        if (userDataA.type.equals("monster_face")) {
-            if (userDataB.type.equals("mario_body")) {
-                // nothing
-            } else if (contact.getFixtureA().getBody() == body) {
-                bodyData.faceRight = !bodyData.faceRight;
-            }
-        }
-
-        if (userDataB.type.equals("monster_face")) {
-            if (userDataA.type.equals("mario_body")) {
-                // nothing
-            } else if (contact.getFixtureB().getBody() == body) {
-                bodyData.faceRight = !bodyData.faceRight;
-            }
-        }
-    }
-
-    @Override
-    public void endContact(Contact contact) {
-
-    }
-
-    @Override
-    public void preSolve(Contact contact, Manifold oldManifold) {
-
-    }
-
-    @Override
-    public void postSolve(Contact contact, ContactImpulse impulse) {
-
-    }
+//    @Override
+//    public void beginContact(Contact contact) {
+//        FixtureUserData userDataA = (FixtureUserData) contact.getFixtureA().getUserData();
+//        FixtureUserData userDataB = (FixtureUserData) contact.getFixtureB().getUserData();
+//        if (userDataA == null || userDataB == null) return;
+//
+//        if (userDataA.type.equals("monster_face")) {
+//            if (userDataB.type.equals("mario_body")) {
+//                // nothing
+//            } else {
+//                bodyData.faceRight = !bodyData.faceRight;
+//            }
+//        }
+//
+//        if (userDataB.type.equals("monster_face")) {
+//            if (userDataA.type.equals("mario_body")) {
+//                // nothing
+//            } else {
+//                bodyData.faceRight = !bodyData.faceRight;
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public void endContact(Contact contact) {
+//
+//    }
+//
+//    @Override
+//    public void preSolve(Contact contact, Manifold oldManifold) {
+//
+//    }
+//
+//    @Override
+//    public void postSolve(Contact contact, ContactImpulse impulse) {
+//
+//    }
 
     @Override
     public void changeState(LifeState state) {

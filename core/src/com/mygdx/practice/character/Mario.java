@@ -1,30 +1,21 @@
 package com.mygdx.practice.character;
 
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Contact;
-import com.badlogic.gdx.physics.box2d.ContactImpulse;
-import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.practice.component.UserController;
-import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioFootData;
-import com.mygdx.practice.model.MarioState;
-import com.mygdx.practice.model.CharacterLifeState;
+import com.mygdx.practice.model.MarioActionState;
 import com.mygdx.practice.util.ZoomHelper;
 
 import java.util.List;
@@ -39,31 +30,35 @@ public class Mario implements Character,
     private MarioFootData footUserData;
     private List<Fixture> fixtures;
 
-    private Texture marioSheet;
-    private TextureRegion marioStandTexture;
-    private TextureRegion marioJumpTexture;
-    private Animation<TextureRegion> runAnimation;
+    private MarioSheetHelper smallMario;
+    private MarioSheetHelper bigMario;
 
     private float animationState = 0.1f;
 
-    public Mario(World world) {
-        marioSheet = new Texture("mario_sheet.png");
-        marioStandTexture = new TextureRegion(marioSheet, 1, 1, 16, 32);
-        marioJumpTexture = new TextureRegion(marioSheet, 1 + 5 * 17, 1, 16, 32);
+    public Mario(World world, ZoomHelper zh) {
+        smallMario = new MarioSheetHelper.Builder("mario_sheet.png")
+                .setMargin(1)
+                .setWidth(16)
+                .setHeight(16)
+                .setBeginY(33)
+                .build();
 
-        Array<TextureRegion> tempFrame = new Array<>();
-        for (int i = 1; i < 4; ++i) {
-            tempFrame.add(new TextureRegion(marioSheet, 1 + 17 * i, 1, 16, 32));
-        }
-        runAnimation = new Animation<>(1f, tempFrame, Animation.PlayMode.LOOP_PINGPONG);
-        tempFrame.clear();
+        bigMario = new MarioSheetHelper.Builder("mario_sheet.png")
+                .setMargin(1)
+                .setWidth(16)
+                .setHeight(32)
+                .build();
+
+
+        float halfX = zh.scalePixel(smallMario.getWidth()) / 2;
+        float halfY = zh.scalePixel(smallMario.getHeight()) / 2;
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.18f, 0.38f);
+        shape.setAsBox(halfX, halfY);
 
         FixtureDef fdef = new FixtureDef();
         fdef.shape = shape;
-        fdef.density = 0.9f;
+        fdef.density = 1f;
         fdef.friction = 0f;
 
         BodyDef bodyDef = new BodyDef();
@@ -82,15 +77,14 @@ public class Mario implements Character,
 
 //        shape.setAsBox(0.179f, 0.001f, new Vector2(0, -0.38f), 0);
         EdgeShape edgeShape = new EdgeShape();
-        edgeShape.set(-0.18f, -0.38f, 0.18f, -0.38f);
+        edgeShape.set(-halfX, -halfY, halfX, -halfY);
         fdef.shape = edgeShape;
         Fixture f = body.createFixture(fdef);
         footUserData = new MarioFootData("mario_foot");
         f.setUserData(footUserData);
         f.setSensor(true);
 
-//        shape.setAsBox(0.09f, 0.001f, new Vector2(0, 0.38f), 0);
-        edgeShape.set(-0.09f, 0.38f, 0.09f, 0.38f);
+        edgeShape.set(-halfX / 2, halfY, halfX / 2, halfY);
         Fixture head = body.createFixture(fdef);
         head.setUserData(new FixtureUserData("mario_head"));
         head.setSensor(true);
@@ -114,14 +108,14 @@ public class Mario implements Character,
 //            bodyData.changeState(MarioState.FALLING);
 //        } else {
         if (footUserData.hasContactTarget() &&
-                (bodyData.getState() == MarioState.JUMP || bodyData.getState() == MarioState.FALLING) &&
+                (bodyData.getState() == MarioActionState.JUMP || bodyData.getState() == MarioActionState.FALLING) &&
                 (body.getLinearVelocity().y <= 0.000001f || body.getLinearVelocity().y >= -0.000001f)) {
-            bodyData.changeState(MarioState.STAND);
+            bodyData.changeState(MarioActionState.STAND);
         } else if (!footUserData.hasContactTarget()) {
-            bodyData.changeState(MarioState.FALLING);
+            bodyData.changeState(MarioActionState.FALLING);
         }
         if (body.getLinearVelocity().y > 0.000001f) {
-            bodyData.changeState(MarioState.JUMP);
+            bodyData.changeState(MarioActionState.JUMP);
         }
 //        }
         if (bodyData.getLifeState().isDying()) {
@@ -141,27 +135,27 @@ public class Mario implements Character,
 
         Vector2 p = body.getPosition();
         MarioBodyData userData = (MarioBodyData) body.getUserData();
-        float w = zh.scalePixel(marioStandTexture.getRegionWidth()) * (userData.faceRight ? 1 : -1);
-        float h = zh.scalePixel(marioStandTexture.getRegionHeight());
-        float x = p.x - (userData.faceRight ? 1 : -1) * zh.scalePixel(marioStandTexture.getRegionWidth()) / 2f;
-        float y = p.y - zh.scalePixel(marioStandTexture.getRegionHeight()) / 2f;
+        float w = zh.scalePixel(smallMario.getWidth()) * (userData.faceRight ? 1 : -1);
+        float h = zh.scalePixel(smallMario.getHeight());
+        float x = p.x - (userData.faceRight ? 1 : -1) * zh.scalePixel(smallMario.getWidth()) / 2f;
+        float y = p.y - zh.scalePixel(smallMario.getHeight()) / 2f;
 
         // LEFT
         switch (bodyData.getState()) {
             case RUN:
-                TextureRegion textureRegion = runAnimation.getKeyFrame(animationState, true);
+                TextureRegion textureRegion = smallMario.getMarioRunningTexture(animationState);
                 spriteBatch.draw(textureRegion,
                         x, y,
                         w, h
                 );
                 break;
             case JUMP:
-                spriteBatch.draw(marioJumpTexture, x, y, w, h);
+                spriteBatch.draw(smallMario.getMarioJumpTexture(), x, y, w, h);
                 break;
 
             case STAND:
             default:
-                spriteBatch.draw(marioStandTexture, x, y, w, h);
+                spriteBatch.draw(smallMario.getMarioStandTexture(), x, y, w, h);
                 break;
         }
         // right
@@ -172,7 +166,7 @@ public class Mario implements Character,
 
     @Override
     public void dispose() {
-        marioSheet.dispose();
+        smallMario.dispose();
     }
 
     @Override
@@ -182,7 +176,7 @@ public class Mario implements Character,
             body.applyLinearImpulse(new Vector2(0.004f, 0), body.getWorldCenter(), true);
         }
         bodyData.faceRight = true;
-        bodyData.changeState(MarioState.RUN);
+        bodyData.changeState(MarioActionState.RUN);
     }
 
     @Override
@@ -192,15 +186,15 @@ public class Mario implements Character,
             body.applyLinearImpulse(new Vector2(-0.004f, 0), body.getWorldCenter(), true);
         }
         bodyData.faceRight = false;
-        bodyData.changeState(MarioState.RUN);
+        bodyData.changeState(MarioActionState.RUN);
     }
 
     @Override
     public void onJump(int pointer) {
         if (body == null || bodyData == null) return;
 
-        MarioState marioState = bodyData.getState();
-        if (marioState != MarioState.JUMP && marioState != MarioState.FALLING) {
+        MarioActionState marioActionState = bodyData.getState();
+        if (marioActionState != MarioActionState.JUMP && marioActionState != MarioActionState.FALLING) {
             body.applyLinearImpulse(new Vector2(0, 0.3f), body.getWorldCenter(), true);
         }
     }
@@ -209,8 +203,8 @@ public class Mario implements Character,
     public void onNoAction() {
         if (body == null || bodyData == null) return;
 
-        if (bodyData.getState() != MarioState.JUMP) {
-            bodyData.changeState(MarioState.STAND);
+        if (bodyData.getState() != MarioActionState.JUMP) {
+            bodyData.changeState(MarioActionState.STAND);
         }
     }
 

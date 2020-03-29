@@ -64,7 +64,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         map = createMap(path);
         mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel(), spriteBatch);
 
-        mario = new Mario(world);
+        mario = new Mario(world, zh);
         Goomba testGoomba = new Goomba(world, enemiesTexture, new Vector2(13, 2));
 
         characters.add(mario);

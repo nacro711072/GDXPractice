@@ -1,6 +1,6 @@
 package com.mygdx.practice.model;
 
-public enum MarioState {
+public enum MarioActionState {
     STAND,
     RUN,
     JUMP,

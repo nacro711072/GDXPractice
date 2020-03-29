@@ -1,8 +1,11 @@
 package com.mygdx.practice;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.CharacterLifeState;
@@ -19,7 +22,11 @@ public class WorldContact implements ContactListener {
 
 //        馬力歐 踩踏敵人事件
         if (dataA != null && dataA.type.equals("mario_foot")) {
-            float marioBottom = contact.getFixtureA().getBody().getPosition().y - 0.38f;
+            EdgeShape shape = (EdgeShape)  contact.getFixtureA().getShape();
+            Vector2 temp = new Vector2();
+            shape.getVertex1(temp);
+
+            float marioBottom = contact.getFixtureA().getBody().getPosition().y + temp.y;
             float otherY = contact.getFixtureB().getBody().getPosition().y;
             if (marioBottom > otherY) {
                 ((MarioFootData) dataA).addContact(dataB);
@@ -32,7 +39,11 @@ public class WorldContact implements ContactListener {
                 }
             }
         } else if (dataB != null && dataB.type.equals("mario_foot")) {
-            float marioBottom = contact.getFixtureB().getBody().getPosition().y - 0.38f;
+            EdgeShape shape = (EdgeShape)  contact.getFixtureA().getShape();
+            Vector2 temp = new Vector2();
+            shape.getVertex1(temp);
+
+            float marioBottom = contact.getFixtureB().getBody().getPosition().y + temp.y;
             float otherY = contact.getFixtureA().getBody().getPosition().y;
             if (marioBottom > otherY) {
                 ((MarioFootData) dataB).addContact(dataA);
@@ -73,7 +84,7 @@ public class WorldContact implements ContactListener {
             if (dataA.type.equals("mario_body")) {
                 // nothing
             } else {
-                bodyData = ((GoombaBodyData) contact.getFixtureA().getBody().getUserData());
+                bodyData = ((GoombaBodyData) contact.getFixtureB().getBody().getUserData());
                 bodyData.faceRight = !bodyData.faceRight;
             }
         }
@@ -85,14 +96,22 @@ public class WorldContact implements ContactListener {
         FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
         FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
         if (dataA != null && dataA.type.equals("mario_foot")) {
-            float marioBottom = contact.getFixtureA().getBody().getPosition().y - 0.38f;
+            EdgeShape shape = (EdgeShape)  contact.getFixtureA().getShape();
+            Vector2 temp = new Vector2();
+            shape.getVertex1(temp);
+
+            float marioBottom = contact.getFixtureA().getBody().getPosition().y + temp.y;
             float otherY = contact.getFixtureB().getBody().getPosition().y;
             if (marioBottom > otherY) {
                 ((MarioFootData) dataA).removeContact(dataB);
             }
 
         } else if (dataB != null && dataB.type.equals("mario_foot")) {
-            float marioBottom = contact.getFixtureB().getBody().getPosition().y - 0.38f;
+            EdgeShape shape = (EdgeShape)  contact.getFixtureA().getShape();
+            Vector2 temp = new Vector2();
+            shape.getVertex1(temp);
+
+            float marioBottom = contact.getFixtureB().getBody().getPosition().y + temp.y;
             float otherY = contact.getFixtureA().getBody().getPosition().y;
             if (marioBottom > otherY) {
                 ((MarioFootData) dataB).removeContact(dataA);

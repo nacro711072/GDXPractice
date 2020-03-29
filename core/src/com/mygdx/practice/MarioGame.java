@@ -8,15 +8,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScalingViewport;
 import com.mygdx.practice.component.UserController;
-import com.mygdx.practice.model.MarioBodyData;
-import com.mygdx.practice.util.CameraHelper;
-import com.mygdx.practice.model.MarioState;
 import com.mygdx.practice.util.ZoomHelper;
 
 /**

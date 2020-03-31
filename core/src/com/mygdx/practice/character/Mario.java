@@ -64,7 +64,7 @@ public class Mario implements Character,
         BodyDef bodyDef = new BodyDef();
         bodyDef.linearDamping = 0.1f;
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(2, 5);
+        bodyDef.position.set(2, 4);
         bodyDef.fixedRotation = true;
 
         bodyData = new MarioBodyData();
@@ -75,19 +75,27 @@ public class Mario implements Character,
         Fixture marioBodyF = body.createFixture(fdef);
         marioBodyF.setUserData(new FixtureUserData("mario_body"));
 
-//        shape.setAsBox(0.179f, 0.001f, new Vector2(0, -0.38f), 0);
-        EdgeShape edgeShape = new EdgeShape();
-        edgeShape.set(-halfX, -halfY, halfX, -halfY);
-        fdef.shape = edgeShape;
+        shape.setAsBox(halfX, 0.001f, new Vector2(0, -halfY), 0);
+//        EdgeShape edgeShape = new EdgeShape();
+//        edgeShape.set(-halfX, -halfY, halfX, -halfY);
+        fdef.shape = shape;
         Fixture f = body.createFixture(fdef);
         footUserData = new MarioFootData("mario_foot");
         f.setUserData(footUserData);
         f.setSensor(true);
 
-        edgeShape.set(-halfX / 2, halfY, halfX / 2, halfY);
+        shape.setAsBox(halfX / 2, 0.001f, new Vector2(0, halfY), 0);
         Fixture head = body.createFixture(fdef);
         head.setUserData(new FixtureUserData("mario_head"));
         head.setSensor(true);
+
+//        bodyDef.position.set(2, 5);
+//        bodyDef.type = BodyDef.BodyType.StaticBody;
+//        Body test = world.createBody(bodyDef);
+//
+//        edgeShape.set(-halfX, halfY, halfX, halfY);
+//        test.createFixture(fdef).setUserData(new FixtureUserData("test"));
+
     }
 
     @Override

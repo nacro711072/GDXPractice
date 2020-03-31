@@ -65,10 +65,10 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel(), spriteBatch);
 
         mario = new Mario(world, zh);
-        Goomba testGoomba = new Goomba(world, enemiesTexture, new Vector2(13, 2));
+//        Goomba testGoomba = new Goomba(world, enemiesTexture, new Vector2(13, 2));
 
         characters.add(mario);
-        characters.add(testGoomba);
+//        characters.add(testGoomba);
 
 //        contactListeners.addContactListener(mario);
 //        contactListeners.addContactListener(testGoomba);
@@ -133,18 +133,6 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             Gdx.app.log("goomba", "x: " + zh.scalePixel(tileMapObject.getX()));
             Goomba testGoomba = new Goomba(world, enemiesTexture, new Vector2(zh.scalePixel(tileMapObject.getX()), zh.scalePixel(tileMapObject.getY())));
             characters.add(testGoomba);
-//            rect = tileMapObject.getTile().get
-//            bdef = new BodyDef();
-//            bdef.type = BodyDef.BodyType.StaticBody;
-//            bdef.position.set(zh.scalePixel(rect.getX() + rect.getWidth() / 2), zh.scalePixel(rect.getY() + rect.getHeight() / 2));
-//
-//            body = world.createBody(bdef);
-//            fixtureDef = new FixtureDef();
-//            fixtureDef.friction = 0f;
-//            shape2 = new PolygonShape();
-//            shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
-//            fixtureDef.shape = shape2;
-//            body.createFixture(fixtureDef);
 
         }
 

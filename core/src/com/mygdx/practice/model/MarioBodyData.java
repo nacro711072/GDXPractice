@@ -49,8 +49,20 @@ public class MarioBodyData implements CharacterLifeState {
 
     @Override
     public void changeState(LifeState state) {
-        if (marioBodyState == MarioBodyState.smallMario && lifeState.isAlive() && state.isDying()) {
+        if (marioBodyState.isSmallState() && lifeState.isAlive() && state.isDying()) {
             lifeState = state;
+        }
+    }
+
+    public void onEnemyContact() {
+        if (marioBodyState.isSmallState()) {
+            goDie();
+        }
+    }
+
+    private void goDie() {
+        if (lifeState.isAlive()) {
+            lifeState = LifeState.DYING;
         }
     }
 

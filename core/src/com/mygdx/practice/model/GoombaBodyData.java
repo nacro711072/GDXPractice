@@ -1,5 +1,7 @@
 package com.mygdx.practice.model;
 
+import com.badlogic.gdx.Gdx;
+
 /**
  * Nick, 2020/3/12
  */
@@ -15,6 +17,7 @@ public class GoombaBodyData implements CharacterLifeState {
     public void changeState(LifeState state) {
         if (lifeState == LifeState.ALIVE && state == LifeState.DYING) {
             lifeState = state;
+            Gdx.app.log("goomba", "life: " + lifeState);
         }
     }
 

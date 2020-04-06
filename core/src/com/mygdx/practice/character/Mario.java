@@ -76,8 +76,6 @@ public class Mario implements Character,
         marioBodyF.setUserData(new FixtureUserData("mario_body"));
 
         shape.setAsBox(halfX, 0.001f, new Vector2(0, -halfY), 0);
-//        EdgeShape edgeShape = new EdgeShape();
-//        edgeShape.set(-halfX, -halfY, halfX, -halfY);
         fdef.shape = shape;
         Fixture f = body.createFixture(fdef);
         footUserData = new MarioFootData("mario_foot");
@@ -88,13 +86,6 @@ public class Mario implements Character,
         Fixture head = body.createFixture(fdef);
         head.setUserData(new FixtureUserData("mario_head"));
         head.setSensor(true);
-
-//        bodyDef.position.set(2, 5);
-//        bodyDef.type = BodyDef.BodyType.StaticBody;
-//        Body test = world.createBody(bodyDef);
-//
-//        edgeShape.set(-halfX, halfY, halfX, halfY);
-//        test.createFixture(fdef).setUserData(new FixtureUserData("test"));
 
     }
 
@@ -109,12 +100,8 @@ public class Mario implements Character,
     }
 
     public void preRender() {
-        if (bodyData == null || body == null) return;
+        if (bodyData == null || body == null || !getLifeState().isAlive()) return;
 
-//        if (!footUserData.hasContactTarget() && body.getLinearVelocity().y <= 0) {
-//            Gdx.app.log("mario", "changeState: to falling");
-//            bodyData.changeState(MarioState.FALLING);
-//        } else {
         if (footUserData.hasContactTarget() &&
                 (bodyData.getState() == MarioActionState.JUMP || bodyData.getState() == MarioActionState.FALLING) &&
                 (body.getLinearVelocity().y <= 0.000001f || body.getLinearVelocity().y >= -0.000001f)) {
@@ -134,7 +121,7 @@ public class Mario implements Character,
 
     @Override
     public void render(Camera camera, ZoomHelper zh, SpriteBatch spriteBatch) {
-        if (bodyData == null || body == null) return;
+        if (bodyData == null || body == null || !getLifeState().isAlive()) return;
 
         animationState = (bodyData.getState() == bodyData.getPreState() ? animationState + 0.1f : 0.1f);
 
@@ -179,7 +166,7 @@ public class Mario implements Character,
 
     @Override
     public void onTouchRight(int pointer) {
-        if (body == null || bodyData == null) return;
+        if (body == null || bodyData == null || !getLifeState().isAlive()) return;
         if (body.getLinearVelocity().x < 0.4) {
             body.applyLinearImpulse(new Vector2(0.004f, 0), body.getWorldCenter(), true);
         }
@@ -189,7 +176,7 @@ public class Mario implements Character,
 
     @Override
     public void onTouchLeft(int pointer) {
-        if (body == null || bodyData == null) return;
+        if (body == null || bodyData == null || !getLifeState().isAlive()) return;
         if (body.getLinearVelocity().x > -0.4) {
             body.applyLinearImpulse(new Vector2(-0.004f, 0), body.getWorldCenter(), true);
         }
@@ -199,7 +186,7 @@ public class Mario implements Character,
 
     @Override
     public void onJump(int pointer) {
-        if (body == null || bodyData == null) return;
+        if (body == null || bodyData == null || !getLifeState().isAlive()) return;
 
         MarioActionState marioActionState = bodyData.getState();
         if (marioActionState != MarioActionState.JUMP && marioActionState != MarioActionState.FALLING) {
@@ -215,85 +202,6 @@ public class Mario implements Character,
             bodyData.changeState(MarioActionState.STAND);
         }
     }
-
-//    @Override
-//    public void beginContact(Contact contact) {
-//        if (!getLifeState().isAlive()) {
-//            return;
-//        }
-//
-//        FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
-//        FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
-//
-////        馬力歐 踩踏敵人事件
-//        if (dataA != null && dataA.type.equals("mario_foot")) {
-//            ((MarioFootData) dataA).addContact(dataB);
-//
-//            Object otherBodyData = contact.getFixtureB().getBody().getUserData();
-//            if (otherBodyData instanceof CharacterLifeState) {
-//                if (body.getPosition().y + 0.38f >= contact.getFixtureB().getBody().getPosition().y) {
-//                    ((CharacterLifeState) otherBodyData).changeState(CharacterLifeState.LifeState.DYING);
-//                }
-//            }
-//        } else if (dataB != null && dataB.type.equals("mario_foot")) {
-//            ((MarioFootData) dataB).addContact(dataA);
-//
-//            Object otherBodyData = contact.getFixtureA().getBody().getUserData();
-//            if (otherBodyData instanceof CharacterLifeState) {
-//                if (body.getPosition().y + 0.38f >= contact.getFixtureB().getBody().getPosition().y) {
-//                    ((CharacterLifeState) otherBodyData).changeState(CharacterLifeState.LifeState.DYING);
-//                }
-//            }
-//        }
-//
-//        if (dataA == null || dataB == null) return;
-//
-//        checkBrickContactEvent(dataA, dataB, true);
-//        checkBrickContactEvent(dataB, dataA, true);
-//
-//        if (dataA.type.equals("monster_face") && dataB.type.equals("mario_body")) {
-//            bodyData.changeState(LifeState.DYING);
-//        } else if (dataB.type.equals("monster_face") && dataA.type.equals("mario_body")) {
-//            bodyData.changeState(LifeState.DYING);
-//        }
-//
-//    }
-//
-//    @Override
-//    public void endContact(Contact contact) {
-//        FixtureUserData dataA = ((FixtureUserData) contact.getFixtureA().getUserData());
-//        FixtureUserData dataB = ((FixtureUserData) contact.getFixtureB().getUserData());
-//        if (dataA != null && dataA.type.equals("mario_foot")) {
-//            ((MarioFootData) dataA).removeContact(dataB);
-//        } else if (dataB != null && dataB.type.equals("mario_foot")) {
-//            ((MarioFootData) dataB).removeContact(dataA);
-//        }
-//
-//        if (dataA == null || dataB == null) return;
-//
-//        checkBrickContactEvent(dataA, dataB, false);
-//        checkBrickContactEvent(dataB, dataA, false);
-//
-//    }
-//
-//    private void checkBrickContactEvent(FixtureUserData dataA, FixtureUserData dataB, boolean isContact) {
-//        if (dataA.type.equals("brick")) {
-//            if (dataB.type.equals("mario_head")) {
-//                ((BrickData) dataA).isMarioHeadContact = isContact;
-//            } else if (dataB.type.equals("mario_body")) {
-//                ((BrickData) dataA).isMarioBodyContact = isContact;
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public void preSolve(Contact contact, Manifold oldManifold) {
-//    }
-//
-//    @Override
-//    public void postSolve(Contact contact, ContactImpulse impulse) {
-//
-//    }
 
     @Override
     public void changeState(LifeState state) {

@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
@@ -63,12 +64,15 @@ public class Goomba implements Character {
         Fixture fixture = body.createFixture(fixtureDef);
         fixtures.add(fixture);
 
-        shape.setAsBox(0.01f, 0.09f, new Vector2(0.18f, 0f), 0);
+        EdgeShape edgeShape = new EdgeShape();
+        edgeShape.set(0.18f, -0.09f, 0.18f, 0.09f);
+        fixtureDef.shape = edgeShape;
+
         fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
         fixture.setUserData(new FixtureUserData("monster_face"));
 
-        shape.setAsBox(0.01f, 0.09f, new Vector2(-0.18f, 0f), 0);
+        edgeShape.set(-0.18f, -0.09f, -0.18f, 0.09f);
         fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
         fixture.setUserData(new FixtureUserData("monster_face"));
@@ -125,44 +129,6 @@ public class Goomba implements Character {
     public void dispose() {
 
     }
-
-//    @Override
-//    public void beginContact(Contact contact) {
-//        FixtureUserData userDataA = (FixtureUserData) contact.getFixtureA().getUserData();
-//        FixtureUserData userDataB = (FixtureUserData) contact.getFixtureB().getUserData();
-//        if (userDataA == null || userDataB == null) return;
-//
-//        if (userDataA.type.equals("monster_face")) {
-//            if (userDataB.type.equals("mario_body")) {
-//                // nothing
-//            } else {
-//                bodyData.faceRight = !bodyData.faceRight;
-//            }
-//        }
-//
-//        if (userDataB.type.equals("monster_face")) {
-//            if (userDataA.type.equals("mario_body")) {
-//                // nothing
-//            } else {
-//                bodyData.faceRight = !bodyData.faceRight;
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public void endContact(Contact contact) {
-//
-//    }
-//
-//    @Override
-//    public void preSolve(Contact contact, Manifold oldManifold) {
-//
-//    }
-//
-//    @Override
-//    public void postSolve(Contact contact, ContactImpulse impulse) {
-//
-//    }
 
     @Override
     public void changeState(LifeState state) {

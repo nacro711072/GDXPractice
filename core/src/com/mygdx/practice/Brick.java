@@ -1,6 +1,5 @@
 package com.mygdx.practice;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -10,14 +9,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.util.ZoomHelper;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
 
 /**
  * Nick, 2020/3/13
@@ -45,10 +40,6 @@ public class Brick {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.friction = 0f;
 
-//            edgeShape.set(-halfX, -halfY, halfX, -halfY); // bottom
-//            edgeShape.set(halfX, -halfY, halfX, halfY); // right
-//            edgeShape.set(halfX, halfY, -halfX, halfY); // top
-//            edgeShape.set(-halfX, halfY, -halfX, -halfY); // left
         int[] singX = new int[] {-1, 1, 1, -1, -1};
         int[] singY = new int[] {-1, -1, 1, 1, -1};
         float[] vertex = new float[] { halfX, halfY, halfX, halfY };

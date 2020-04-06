@@ -65,13 +65,8 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel(), spriteBatch);
 
         mario = new Mario(world, zh);
-//        Goomba testGoomba = new Goomba(world, enemiesTexture, new Vector2(13, 2));
 
         characters.add(mario);
-//        characters.add(testGoomba);
-
-//        contactListeners.addContactListener(mario);
-//        contactListeners.addContactListener(testGoomba);
 
         world.setContactListener(new WorldContact());
     }
@@ -89,6 +84,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         Body body;
         FixtureDef fixtureDef;
         PolygonShape shape2;
+//        地板
         for (RectangleMapObject mapObj: map.getLayers().get(2).getObjects().getByType(RectangleMapObject.class)) {
             rect = mapObj.getRectangle();
             bdef = new BodyDef();
@@ -102,9 +98,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             fixtureDef.shape = shape2;
             body.createFixture(fixtureDef);
         }
-//        RectangleMapObject mapObject = map.getLayers().get(2).getObjects().getByType(RectangleMapObject.class).get(0);
 
-//        地板
 // pipe
         for (RectangleMapObject mapObj: map.getLayers().get(3).getObjects().getByType(RectangleMapObject.class)) {
             rect = mapObj.getRectangle();
@@ -130,7 +124,6 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         }
 
         for (TiledMapTileMapObject tileMapObject : ((MapGroupLayer) map.getLayers().get(5)).getLayers().get(0).getObjects().getByType(TiledMapTileMapObject.class)) {
-            Gdx.app.log("goomba", "x: " + zh.scalePixel(tileMapObject.getX()));
             Goomba testGoomba = new Goomba(world, enemiesTexture, new Vector2(zh.scalePixel(tileMapObject.getX()), zh.scalePixel(tileMapObject.getY())));
             characters.add(testGoomba);
 
@@ -149,13 +142,6 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
                 character.dispose();
             }
         }
-//        for (Character character: characters) {
-//            if (character.getLifeState().isDead()) {
-//                world.destroyBody(character.getBody());
-//                characters.remove(character);
-//                character.dispose();
-//            }
-//        }
 
         if (mario.getBody() != null) {
             CameraHelper.lookAt(camera, mario.getBody().getPosition(), panRange, cameraBound);
@@ -194,6 +180,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         for (Character character : characters) {
             character.dispose();
         }
+        enemiesTexture.dispose();
     }
 
     @Override

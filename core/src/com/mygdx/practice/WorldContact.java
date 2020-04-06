@@ -2,6 +2,7 @@ package com.mygdx.practice;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
@@ -25,42 +26,30 @@ public class WorldContact implements ContactListener {
         checkMarioStampEvent(contact.getFixtureA(), contact.getFixtureB());
         checkMarioStampEvent(contact.getFixtureB(), contact.getFixtureA());
 
+        //Goomba
+        checkGoombaEvent(contact.getFixtureA(), contact.getFixtureB());
+        checkGoombaEvent(contact.getFixtureB(), contact.getFixtureA());
+
         if (dataA == null || dataB == null) return;
 
         checkBrickContactEvent(contact.getFixtureA(), dataB, true);
         checkBrickContactEvent(contact.getFixtureB(), dataA, true);
 
-        if (dataA.type.equals("monster_face") && dataB.type.equals("mario_body")) {
-            Object bodyData = contact.getFixtureA().getBody().getUserData();
-            if (bodyData instanceof CharacterLifeState &&
-                    ((CharacterLifeState) bodyData).getLifeState().isAlive()) {
-                ((MarioBodyData) contact.getFixtureB().getBody().getUserData()).onEnemyContact();
-            }
-        } else if (dataB.type.equals("monster_face") && dataA.type.equals("mario_body")) {
-            Object bodyData = contact.getFixtureB().getBody().getUserData();
-            if (bodyData instanceof CharacterLifeState &&
-                    ((CharacterLifeState) bodyData).getLifeState().isAlive()) {
+    }
 
-                ((MarioBodyData) contact.getFixtureA().getBody().getUserData()).onEnemyContact();
-            }
-        }
+    private void checkGoombaEvent(Fixture fixtureA, Fixture fixtureB) {
+        FixtureUserData dataA = (FixtureUserData) fixtureA.getUserData();
+        FixtureUserData dataB = (FixtureUserData) fixtureB.getUserData();
 
-        //Goomba
-        GoombaBodyData bodyData;
-        if (dataA.type.equals("monster_face")) {
-            if (dataB.type.equals("mario_body")) {
-                // nothing
+        if (dataA != null && dataA.type.equals("monster_face")) {
+            GoombaBodyData bodyData = (GoombaBodyData) fixtureA.getBody().getUserData();
+
+            if (dataB != null && dataB.type.equals("mario_body")) {
+                if (bodyData != null &&
+                        bodyData.getLifeState().isAlive()) {
+                    ((MarioBodyData) fixtureB.getBody().getUserData()).onEnemyContact();
+                }
             } else {
-                bodyData = ((GoombaBodyData) contact.getFixtureA().getBody().getUserData());
-                bodyData.faceRight = !bodyData.faceRight;
-            }
-        }
-
-        if (dataB.type.equals("monster_face")) {
-            if (dataA.type.equals("mario_body")) {
-                // nothing
-            } else {
-                bodyData = ((GoombaBodyData) contact.getFixtureB().getBody().getUserData());
                 bodyData.faceRight = !bodyData.faceRight;
             }
         }
@@ -77,19 +66,21 @@ public class WorldContact implements ContactListener {
         Vector2 temp = new Vector2();
         shape.getVertex(0, temp);
 
-        float marioBottom = fixtureA.getBody().getPosition().y + temp.y;
-        float otherY = fixtureB.getBody().getPosition().y;
+        Body marioBody = fixtureA.getBody();
+        Body otherBody = fixtureB.getBody();
+
+        float marioBottom = marioBody.getPosition().y + temp.y;
+        float otherY = otherBody.getPosition().y;
+
         if (marioBottom > otherY) {
             ((MarioFootData) dataA).addContact((FixtureUserData) fixtureB.getUserData());
-            changeLifeState(fixtureB.getBody().getUserData());
+            Object bodyUserData = otherBody.getUserData();
+            if (bodyUserData instanceof CharacterLifeState) {
+                ((CharacterLifeState) bodyUserData).changeState(CharacterLifeState.LifeState.DYING);
+                marioBody.setLinearVelocity(new Vector2(0, 0.5f));
+            }
         }
 
-    }
-
-    private void changeLifeState(Object bodyUserData) {
-        if (bodyUserData instanceof CharacterLifeState) {
-            ((CharacterLifeState) bodyUserData).changeState(CharacterLifeState.LifeState.DYING);
-        }
     }
 
     @Override

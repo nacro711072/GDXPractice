@@ -32,8 +32,8 @@ public class WorldContact implements ContactListener {
 
         if (dataA == null || dataB == null) return;
 
-        checkBrickContactEvent(contact.getFixtureA(), dataB, true);
-        checkBrickContactEvent(contact.getFixtureB(), dataA, true);
+        checkBrickContactEvent(contact.getFixtureA(), contact.getFixtureB(), true);
+        checkBrickContactEvent(contact.getFixtureB(), contact.getFixtureA(), true);
 
     }
 
@@ -113,8 +113,8 @@ public class WorldContact implements ContactListener {
 
         if (dataA == null || dataB == null) return;
 
-        checkBrickContactEvent(contact.getFixtureA(), dataB, false);
-        checkBrickContactEvent(contact.getFixtureB(), dataA, false);
+        checkBrickContactEvent(contact.getFixtureA(), contact.getFixtureB(), false);
+        checkBrickContactEvent(contact.getFixtureB(), contact.getFixtureA(), false);
 
     }
 
@@ -128,18 +128,18 @@ public class WorldContact implements ContactListener {
 
     }
 
-    private void checkBrickContactEvent(Fixture fixtureA, FixtureUserData dataB, boolean isContact) {
+    private void checkBrickContactEvent(Fixture fixtureA, Fixture fixtureB, boolean isContact) {
         if (((FixtureUserData) fixtureA.getUserData()).type.contains("brick")) {
             Gdx.app.log("test", "type name: " + ((FixtureUserData) fixtureA.getUserData()).type);
         }
+
         if (((FixtureUserData) fixtureA.getUserData()).type.equals("brick_b")) {
             BrickData dataA = (BrickData) fixtureA.getBody().getUserData();
+            FixtureUserData dataB = (FixtureUserData) fixtureB.getUserData();
             if (dataB.type.equals("mario_head")) {
                 dataA.isMarioHeadContact = isContact;
-                Gdx.app.log("test", "isMarioHeadContact: " + isContact);
             } else if (dataB.type.equals("mario_body")) {
                 dataA.isMarioBodyContact = isContact;
-                Gdx.app.log("test", "isMarioBodyContact: " + isContact);
             }
         }
     }

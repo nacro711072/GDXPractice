@@ -1,15 +1,12 @@
 package com.mygdx.practice;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapGroupLayer;
-import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.objects.TextureMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -26,12 +23,11 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.practice.character.Character;
 import com.mygdx.practice.character.Goomba;
-import com.mygdx.practice.character.Mario;
+import com.mygdx.practice.character.mario.Mario;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.map.MarioMapWrapper;
 import com.mygdx.practice.util.CameraHelper;
 import com.mygdx.practice.util.ZoomHelper;
-import com.mygdx.practice.wrapper.MultiContactListener;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -149,7 +145,8 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         }
 
         for (Brick brick: bricks) {
-            brick.preRender(new Brick.PreRenderCallback() {
+
+            brick.preRender(mario.getMarioBodyState(), new Brick.PreRenderCallback() {
                 @Override
                 public TiledMapTile getMapTileWithType(int type) {
                     return map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK);

@@ -6,4 +6,9 @@ public enum MarioBodyState {
     public boolean isSmallState() {
         return this == smallMario;
     }
+
+    public boolean isBigState() {
+        return this == bigMario;
+    }
+
 }

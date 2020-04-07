@@ -1,4 +1,4 @@
-package com.mygdx.practice.character;
+package com.mygdx.practice.character.mario;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -6,14 +6,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.mygdx.practice.character.Character;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.MarioBodyData;
+import com.mygdx.practice.model.MarioBodyState;
 import com.mygdx.practice.model.MarioFootData;
 import com.mygdx.practice.model.MarioActionState;
 import com.mygdx.practice.util.ZoomHelper;
@@ -26,32 +27,18 @@ import java.util.List;
 public class Mario implements Character,
         UserController.TouchListener {
     private Body body;
-    private MarioBodyData bodyData;
+    private MarioBodyData bodyData = new MarioBodyData();
     private MarioFootData footUserData;
     private List<Fixture> fixtures;
 
-    private MarioSheetHelper smallMario;
-    private MarioSheetHelper bigMario;
+    private MarioTextureRepository marioTextureRepository = new MarioTextureRepository("mario_sheet.png");
 
     private float animationState = 0.1f;
 
     public Mario(World world, ZoomHelper zh) {
-        smallMario = new MarioSheetHelper.Builder("mario_sheet.png")
-                .setMargin(1)
-                .setWidth(16)
-                .setHeight(16)
-                .setBeginY(33)
-                .build();
 
-        bigMario = new MarioSheetHelper.Builder("mario_sheet.png")
-                .setMargin(1)
-                .setWidth(16)
-                .setHeight(32)
-                .build();
-
-
-        float halfX = zh.scalePixel(smallMario.getWidth()) / 2;
-        float halfY = zh.scalePixel(smallMario.getHeight()) / 2;
+        float halfX = zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) / 2;
+        float halfY = zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState())) / 2;
 
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(halfX, halfY);
@@ -67,7 +54,7 @@ public class Mario implements Character,
         bodyDef.position.set(2, 4);
         bodyDef.fixedRotation = true;
 
-        bodyData = new MarioBodyData();
+
 
         body = world.createBody(bodyDef);
         body.setUserData(bodyData);
@@ -116,7 +103,6 @@ public class Mario implements Character,
         if (bodyData.getLifeState().isDying()) {
             bodyData.addDyingCountIfDying();
         }
-
     }
 
     @Override
@@ -130,27 +116,27 @@ public class Mario implements Character,
 
         Vector2 p = body.getPosition();
         MarioBodyData userData = (MarioBodyData) body.getUserData();
-        float w = zh.scalePixel(smallMario.getWidth()) * (userData.faceRight ? 1 : -1);
-        float h = zh.scalePixel(smallMario.getHeight());
-        float x = p.x - (userData.faceRight ? 1 : -1) * zh.scalePixel(smallMario.getWidth()) / 2f;
-        float y = p.y - zh.scalePixel(smallMario.getHeight()) / 2f;
+        float w = zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) * (userData.faceRight ? 1 : -1);
+        float h = zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState()));
+        float x = p.x - (userData.faceRight ? 1 : -1) * zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) / 2f;
+        float y = p.y - zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState())) / 2f;
 
         // LEFT
         switch (bodyData.getState()) {
             case RUN:
-                TextureRegion textureRegion = smallMario.getMarioRunningTexture(animationState);
+                TextureRegion textureRegion = marioTextureRepository.getMarioRunningTexture(getMarioBodyState(), animationState);
                 spriteBatch.draw(textureRegion,
                         x, y,
                         w, h
                 );
                 break;
             case JUMP:
-                spriteBatch.draw(smallMario.getMarioJumpTexture(), x, y, w, h);
+                spriteBatch.draw(marioTextureRepository.getMarioJumpTexture(getMarioBodyState()), x, y, w, h);
                 break;
 
             case STAND:
             default:
-                spriteBatch.draw(smallMario.getMarioStandTexture(), x, y, w, h);
+                spriteBatch.draw(marioTextureRepository.getMarioStandTexture(getMarioBodyState()), x, y, w, h);
                 break;
         }
         // right
@@ -161,7 +147,7 @@ public class Mario implements Character,
 
     @Override
     public void dispose() {
-        smallMario.dispose();
+        marioTextureRepository.dispose();
     }
 
     @Override
@@ -211,5 +197,9 @@ public class Mario implements Character,
     @Override
     public LifeState getLifeState() {
         return bodyData.getLifeState();
+    }
+
+    public MarioBodyState getMarioBodyState() {
+        return bodyData.getMarioBodyState();
     }
 }

@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.FixtureUserData;
+import com.mygdx.practice.model.MarioBodyState;
 import com.mygdx.practice.util.ZoomHelper;
 
 /**
@@ -84,16 +85,18 @@ public class Brick {
         }
     }
 
-    public void preRender(PreRenderCallback callback) {
+    public void preRender(MarioBodyState marioBodyState, PreRenderCallback callback) {
 //        Gdx.app.log("test", "isMarioHitBrick: " + brickData.isMarioHitBrick());
-        if (brickData != null && brickData.isMarioHitBrick()) {
-            if (brickData.isBreakable()) {
-                setTile(null);
-                return;
-            }
+        if (!marioBodyState.isSmallState()) {
+            if (brickData != null && brickData.isMarioHitBrick()) {
+                if (brickData.isBreakable()) {
+                    setTile(null);
+                    return;
+                }
 
-            Integer type = brickData.getProperties().get("type", Integer.class);
-            setTile(callback.getMapTileWithType(type));
+                Integer type = brickData.getProperties().get("type", Integer.class);
+                setTile(callback.getMapTileWithType(type));
+            }
         }
 
     }

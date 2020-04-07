@@ -49,7 +49,7 @@ public class MarioBodyData implements CharacterLifeState {
 
     @Override
     public void changeState(LifeState state) {
-        if (marioBodyState.isSmallState() && lifeState.isAlive() && state.isDying()) {
+        if (marioBodyState.isSmallState()) {
             lifeState = state;
         }
     }

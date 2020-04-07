@@ -139,7 +139,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             }
         }
 
-        if (mario.getBody() != null) {
+        if (mario.getBody() != null && mario.getLifeState().isAlive()) {
             CameraHelper.lookAt(camera, mario.getBody().getPosition(), panRange, cameraBound);
             mario.preRender();
         }

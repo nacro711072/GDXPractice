@@ -63,6 +63,18 @@ public class MarioTextureRepository {
         return null;
     }
 
+    public TextureRegion getMarioDeadTexture(MarioBodyState bodyState) {
+        switch (bodyState) {
+            case smallMario:
+                return smallMario.getByPosition(6);
+            case bigMario:
+            case superMario:
+                return null;
+        }
+        return null;
+    }
+
+
     public int getWidth(MarioBodyState bodyState) {
         switch (bodyState) {
             case smallMario:

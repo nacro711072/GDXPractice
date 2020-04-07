@@ -18,6 +18,7 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.practice.Config;
 import com.mygdx.practice.model.FixtureUserData;
 import com.mygdx.practice.model.GoombaBodyData;
 import com.mygdx.practice.util.ZoomHelper;
@@ -60,6 +61,7 @@ public class Goomba implements Character {
         shape.setAsBox(0.18f, 0.18f);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
+        fixtureDef.filter.groupIndex = Config.FILER_DATA_ENEMY;
 
         Fixture fixture = body.createFixture(fixtureDef);
         fixtures.add(fixture);

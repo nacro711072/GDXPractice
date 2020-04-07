@@ -29,6 +29,7 @@ public class Mario implements Character,
     private Body body;
     private MarioBodyData bodyData = new MarioBodyData();
     private MarioFootData footUserData;
+    private MarioDeadAnimation marioDeadAnimation;
     private List<Fixture> fixtures;
 
     private MarioTextureRepository marioTextureRepository = new MarioTextureRepository("mario_sheet.png");
@@ -53,8 +54,6 @@ public class Mario implements Character,
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(2, 4);
         bodyDef.fixedRotation = true;
-
-
 
         body = world.createBody(bodyDef);
         body.setUserData(bodyData);
@@ -99,7 +98,7 @@ public class Mario implements Character,
         if (body.getLinearVelocity().y > 0.000001f) {
             bodyData.changeState(MarioActionState.JUMP);
         }
-//        }
+
         if (bodyData.getLifeState().isDying()) {
             bodyData.addDyingCountIfDying();
         }
@@ -107,36 +106,58 @@ public class Mario implements Character,
 
     @Override
     public void render(Camera camera, ZoomHelper zh, SpriteBatch spriteBatch) {
-        if (bodyData == null || body == null || !getLifeState().isAlive()) return;
+
+        if (bodyData == null || body == null) return;
 
         animationState = (bodyData.getState() == bodyData.getPreState() ? animationState + 0.1f : 0.1f);
+
+        Vector2 p = body.getPosition();
+        float w = zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) * (bodyData.faceRight ? 1 : -1);
+        float h = zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState()));
+        float x = p.x - (bodyData.faceRight ? 1 : -1) * zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) / 2f;
+        float y = p.y - zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState())) / 2f;
 
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
 
-        Vector2 p = body.getPosition();
-        MarioBodyData userData = (MarioBodyData) body.getUserData();
-        float w = zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) * (userData.faceRight ? 1 : -1);
-        float h = zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState()));
-        float x = p.x - (userData.faceRight ? 1 : -1) * zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) / 2f;
-        float y = p.y - zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState())) / 2f;
+
+        TextureRegion textureRegion;
+        if (getLifeState().isDying()) {
+            if (marioDeadAnimation == null) {
+                marioDeadAnimation = new MarioDeadAnimation();
+            }
+
+            if (marioDeadAnimation.isTimeEnd()) {
+                changeState(LifeState.DEAD);
+            }
+            textureRegion = marioTextureRepository.getMarioDeadTexture(getMarioBodyState());
+            y += marioDeadAnimation.getNextY();
+            spriteBatch.draw(textureRegion,
+                    x, y,
+                    w, h
+            );
+            spriteBatch.end();
+            return;
+        }
 
         // LEFT
         switch (bodyData.getState()) {
             case RUN:
-                TextureRegion textureRegion = marioTextureRepository.getMarioRunningTexture(getMarioBodyState(), animationState);
+                textureRegion = marioTextureRepository.getMarioRunningTexture(getMarioBodyState(), animationState);
                 spriteBatch.draw(textureRegion,
                         x, y,
                         w, h
                 );
                 break;
             case JUMP:
-                spriteBatch.draw(marioTextureRepository.getMarioJumpTexture(getMarioBodyState()), x, y, w, h);
+                textureRegion = marioTextureRepository.getMarioJumpTexture(getMarioBodyState());
+                spriteBatch.draw(textureRegion, x, y, w, h);
                 break;
 
             case STAND:
             default:
-                spriteBatch.draw(marioTextureRepository.getMarioStandTexture(getMarioBodyState()), x, y, w, h);
+                textureRegion = marioTextureRepository.getMarioStandTexture(getMarioBodyState());
+                spriteBatch.draw(textureRegion, x, y, w, h);
                 break;
         }
         // right

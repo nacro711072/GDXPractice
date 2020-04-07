@@ -113,5 +113,7 @@ public class MarioSheetHelper implements Disposable {
         return height;
     }
 
-
+    public TextureRegion getByPosition(int x) {
+        return new TextureRegion(marioSheet, beginX + margin + (width + margin) * x, beginY + margin, width, height);
+    }
 }

@@ -14,7 +14,7 @@ public class MarioFootData extends FixtureUserData {
     public void addContact(FixtureUserData target) {
         synchronized (this) {
             if(contactTarget.add(target)) {
-                Gdx.app.log("foot", "addContact, hasContact: " + hasContactTarget());
+                Gdx.app.log("foot", "addContact, target: " + target);
             }
         }
     }
@@ -22,7 +22,7 @@ public class MarioFootData extends FixtureUserData {
     public void removeContact(FixtureUserData target) {
         synchronized (this) {
             if (contactTarget.remove(target)) {
-                Gdx.app.log("foot", "removeContact, hasContact: " + hasContactTarget());
+                Gdx.app.log("foot", "removeContact, target: " + hasContactTarget());
             }
         }
     }

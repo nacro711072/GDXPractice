@@ -30,7 +30,7 @@ public final class UserController implements Disposable, InputProcessor {
     private PressModel isJumpPress = new PressModel();
 
     private OrthographicCamera fixCamera = new OrthographicCamera();
-    private SpriteBatch batch = new SpriteBatch();
+//    private SpriteBatch batch = new SpriteBatch();
     private List<TouchListener> touchListeners = new ArrayList<>();
 
     private ZoomHelper zh = new ZoomHelper(1);
@@ -133,16 +133,16 @@ public final class UserController implements Disposable, InputProcessor {
         }
     }
 
-    public void render() {
+    public void render(SpriteBatch spriteBatch) {
         if (zh == null) {
             zh = new ZoomHelper(1);
         }
 
-        batch.setProjectionMatrix(fixCamera.combined);
+        spriteBatch.setProjectionMatrix(fixCamera.combined);
 
-        batch.begin();
+        spriteBatch.begin();
 // right
-        batch.draw(mLeftAndRight,
+        spriteBatch.draw(mLeftAndRight,
                 rectangleRight.x, rectangleRight.y, // 圖片左下角的點
                 0, 0, // 操作的中心點???
                 mLeftAndRight.getWidth(), mLeftAndRight.getHeight(), // 渲染出來的寬高
@@ -152,7 +152,7 @@ public final class UserController implements Disposable, InputProcessor {
                 mLeftAndRight.getWidth(), mLeftAndRight.getHeight(), // 操作目標的寬高
                 false, false);
 // left
-        batch.draw(mLeftAndRight,
+        spriteBatch.draw(mLeftAndRight,
                 -fixCamera.viewportWidth / 2 + mLeftAndRight.getWidth() + 12, rectangleRight.y, // 圖片左下角的點
                 0, mLeftAndRight.getHeight() / 2, // 操作的中心點???
                 mLeftAndRight.getWidth(), mLeftAndRight.getHeight(), // 渲染出來的寬高
@@ -163,7 +163,7 @@ public final class UserController implements Disposable, InputProcessor {
                 false, false);
 
 // jump
-        batch.draw(mJump,
+        spriteBatch.draw(mJump,
                 fixCamera.viewportWidth / 2 - 60, -fixCamera.viewportHeight / 2 + 24,
                 0, 0,
                 mJump.getWidth(), mJump.getHeight(),
@@ -173,7 +173,7 @@ public final class UserController implements Disposable, InputProcessor {
                 mJump.getWidth(), mJump.getHeight(),
                 false, false);
 
-        batch.end();
+        spriteBatch.end();
 
         for (TouchListener listener: touchListeners) {
             if (isRightPress.isPress) {
@@ -200,7 +200,7 @@ public final class UserController implements Disposable, InputProcessor {
 
     @Override
     public void dispose() {
-        batch.dispose();
+//        batch.dispose();
     }
 
     public interface TouchListener {

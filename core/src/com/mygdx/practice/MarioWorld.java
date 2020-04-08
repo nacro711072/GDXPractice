@@ -1,31 +1,36 @@
 package com.mygdx.practice;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapGroupLayer;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.practice.character.Character;
-import com.mygdx.practice.character.Mario;
+import com.mygdx.practice.character.Goomba;
+import com.mygdx.practice.character.mario.Mario;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.map.MarioMapWrapper;
-import com.mygdx.practice.model.BrickData;
+import com.mygdx.practice.util.CameraHelper;
 import com.mygdx.practice.util.ZoomHelper;
-import com.mygdx.practice.wrapper.MultiContactListener;
 
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -41,41 +46,56 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
     private Box2DDebugRenderer box2dRender;
 
     private Mario mario;
-    private List<Character> characters = new ArrayList<>();
-    private MultiContactListener contactListeners = new MultiContactListener();
+    private Rectangle cameraBound;
+    private List<Character> characters = new LinkedList<>();
+    private List<Brick> bricks = new LinkedList<>();
+//    private MultiContactListener contactListeners = new MultiContactListener();
+    private Texture enemiesTexture = new Texture("map/mario_enemies_bosses_sheet.png");
 
 
-    MarioWorld(World world, ZoomHelper zoomHelper, String path) {
+    MarioWorld(World world, ZoomHelper zoomHelper, String path, SpriteBatch spriteBatch) {
         this.world = world;
         this.zh = zoomHelper;
         box2dRender = new Box2DDebugRenderer();
-        createMap(path);
+        map = createMap(path);
+        mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel(), spriteBatch);
 
-        mario = new Mario(world, CharacterId.Mario);
+        mario = new Mario(world, zh);
+
         characters.add(mario);
-        contactListeners.addContactListener(mario);
 
-        world.setContactListener(mario);
+        world.setContactListener(new WorldContact());
     }
 
-    private void createMap(String path) {
+    public void setupCameraBound(Rectangle cameraBound) {
+        this.cameraBound = cameraBound;
+    }
+
+    private MarioMapWrapper createMap(String path) {
         TmxMapLoader mapLoader = new TmxMapLoader();
-        map = new MarioMapWrapper(mapLoader.load(path));
+        MarioMapWrapper map = new MarioMapWrapper(mapLoader.load(path));
 
-        RectangleMapObject mapObject = map.getLayers().get(2).getObjects().getByType(RectangleMapObject.class).get(0);
-        Rectangle rect = mapObject.getRectangle();
-
-        BodyDef bdef = new BodyDef();
-        bdef.type = BodyDef.BodyType.StaticBody;
-        bdef.position.set(zh.scalePixel(rect.getX() + rect.getWidth() / 2), zh.scalePixel(rect.getY() + rect.getHeight() / 2));
+        Rectangle rect;
+        BodyDef bdef;
+        Body body;
+        FixtureDef fixtureDef;
+        PolygonShape shape2;
 //        地板
-        Body body = world.createBody(bdef);
-        FixtureDef fixtureDef = new FixtureDef();
-        PolygonShape shape2 = new PolygonShape();
-        shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
-        fixtureDef.shape = shape2;
-        body.createFixture(fixtureDef);
-// tower
+        for (RectangleMapObject mapObj: map.getLayers().get(2).getObjects().getByType(RectangleMapObject.class)) {
+            rect = mapObj.getRectangle();
+            bdef = new BodyDef();
+            bdef.type = BodyDef.BodyType.StaticBody;
+            bdef.position.set(zh.scalePixel(rect.getX() + rect.getWidth() / 2), zh.scalePixel(rect.getY() + rect.getHeight() / 2));
+            body = world.createBody(bdef);
+
+            fixtureDef = new FixtureDef();
+            shape2 = new PolygonShape();
+            shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
+            fixtureDef.shape = shape2;
+            body.createFixture(fixtureDef);
+        }
+
+// pipe
         for (RectangleMapObject mapObj: map.getLayers().get(3).getObjects().getByType(RectangleMapObject.class)) {
             rect = mapObj.getRectangle();
             bdef = new BodyDef();
@@ -93,61 +113,50 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
 // brick
         for (RectangleMapObject mapObj: map.getLayers().get(4).getObjects().getByType(RectangleMapObject.class)) {
             rect = mapObj.getRectangle();
-            bdef = new BodyDef();
-            bdef.type = BodyDef.BodyType.StaticBody;
-            bdef.position.set(zh.scalePixel(rect.getX() + rect.getWidth() / 2), zh.scalePixel(rect.getY() + rect.getHeight() / 2));
+            TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
+            TiledMapTileLayer.Cell cell = layer.getCell((int) ((rect.getX() + rect.getWidth() / 2) / 16), (int) ((rect.getY() + rect.getHeight() / 2) / 16));
 
-            body = world.createBody(bdef);
-            fixtureDef = new FixtureDef();
-            fixtureDef.friction = 0f;
-            shape2 = new PolygonShape();
-            shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
-            fixtureDef.shape = shape2;
-            Fixture fixture = body.createFixture(fixtureDef);
-            fixture.setUserData(new BrickData(mapObj.getProperties()));
+            bricks.add(new Brick(world, mapObj, cell, zh));
         }
 
-        mapRender = new OrthogonalTiledMapRenderer(map, zh.scalePixel());
+        for (TiledMapTileMapObject tileMapObject : ((MapGroupLayer) map.getLayers().get(5)).getLayers().get(0).getObjects().getByType(TiledMapTileMapObject.class)) {
+            Goomba testGoomba = new Goomba(world, enemiesTexture, new Vector2(zh.scalePixel(tileMapObject.getX()), zh.scalePixel(tileMapObject.getY())));
+            characters.add(testGoomba);
+
+        }
+
+        return map;
     }
 
-    public Body getBodyById(CharacterId id) {
-        for (Character character: characters) {
-            if (character.getId() == id) {
-                return character.getBody();
+    public void preRender(Camera camera, Vector2 panRange) {
+        Iterator<Character> it = characters.iterator();
+        while (it.hasNext()) {
+            Character character = it.next();
+            if (character.getLifeState().isDead()) {
+                world.destroyBody(character.getBody());
+                it.remove();
+                character.dispose();
             }
         }
-        return null;
-    }
 
-    public void preRender() {
-        mario.preRender();
-        Array<Fixture> fixtureArray = new Array<>(world.getFixtureCount());
-        world.getFixtures(fixtureArray);
-        for (Fixture fixture: fixtureArray) {
-            if (!(fixture.getUserData() instanceof BrickData)) continue;
-
-            BrickData userData = (BrickData) fixture.getUserData();
-            if (userData != null && userData.isMarioHitBrick()) {
-                Vector2 p = fixture.getBody().getPosition();
-                TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(1);
-                TiledMapTileLayer.Cell cell = layer.getCell((int) (p.x / zh.scalePixel() / 16), (int) (p.y / zh.scalePixel() / 16));
-
-                if (userData.isBreakable()) {
-                    cell.setTile(null);
-                    fixture.getBody().destroyFixture(fixture);
-                    continue;
-                }
-
-                Integer type = userData.getProperties().get("type", Integer.class);
-                if (type == 2) {
-                    cell.setTile(map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK));
-                    fixture.setUserData(null);
-                }
-            }
+        if (mario.getBody() != null && mario.getLifeState().isAlive()) {
+            CameraHelper.lookAt(camera, mario.getBody().getPosition(), panRange, cameraBound);
+            mario.preRender();
         }
+
+        for (Brick brick: bricks) {
+
+            brick.preRender(mario.getMarioBodyState(), new Brick.PreRenderCallback() {
+                @Override
+                public TiledMapTile getMapTileWithType(int type) {
+                    return map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK);
+                }
+            });
+        }
+
     }
 
-    public void render(OrthographicCamera camera) {
+    public void render(OrthographicCamera camera, SpriteBatch spriteBatch) {
         world.step(1 / 10f, 8, 3);
 
         mapRender.setView(camera);
@@ -156,7 +165,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         box2dRender.render(world, camera.combined);
 
         for (Character character : characters) {
-            character.render(camera, zh);
+            character.render(camera, zh, spriteBatch);
         }
     }
 
@@ -168,6 +177,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         for (Character character : characters) {
             character.dispose();
         }
+        enemiesTexture.dispose();
     }
 
     @Override
@@ -188,9 +198,5 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
     @Override
     public void onNoAction() {
         mario.onNoAction();
-    }
-
-    public enum CharacterId {
-        Mario;
     }
 }

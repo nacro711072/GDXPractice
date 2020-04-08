@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="128" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="19">
- <tileset firstgid="1" source="NES - Super Mario Bros - Tileset.tsx"/>
+<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="128" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="45">
+ <tileset firstgid="1" name="NES - Super Mario Bros - Tileset" tilewidth="16" tileheight="16" tilecount="924" columns="33">
+  <image source="NES - Super Mario Bros - Tileset.png" width="528" height="448"/>
+ </tileset>
+ <tileset firstgid="925" name="mario_enemies_bosses_sheet" tilewidth="16" tileheight="16" tilecount="400" columns="50">
+  <image source="mario_enemies_bosses_sheet.png" width="808" height="128"/>
+ </tileset>
  <layer id="1" name="background" width="128" height="32">
   <data encoding="base64" compression="zlib">
    eAHt2TEKwCAQRUHJ/S+Us9nEgL+zEQQRp5BtAgn7pgnWp5Tq2AEDDDDAAAMMMMAAAwwwwAADDDDAAAMMMMAAAwwwwAADDHQDb5s57hLvu09N+3/qbwcMMMAAAwwwwAADDDDAAAMMnGUg//W6ndVtplca754z3+zZdR53d8/7NV3X1C7tkgEGGGCAAQYYYIABBkYGPvadvUo=
@@ -8,11 +13,13 @@
  </layer>
  <layer id="4" name="load" width="128" height="32">
   <data encoding="base64" compression="zlib">
-   eAHt0jEKgDAQBMBYamFhJ/oCfZP//4YXSBEQCZbqHCyGBCzmNiVDgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIECBAgACBe4EpnnLm8s1nQ4AAgacCfZfSEDHfFGjtd4vd7/b/muWPsasjspTU53y3Rupp7bf1Xv/L+SqQuYWBDuiADuiADuiADvynAyds/gWF
+   eAHtlUEKwkAQBEdvevDgLegL9E3+3oc4gzksa2DJxRCqFgY3CRq6ahsjXEXgIAY0Af2j9dt/tn796x9OgB3f/3/9swmw09t//bMJsNPbf/2zCbDT23/9swmw09t//bMJsNPbf/2zCbDT23/9swmw09t//bMJsNPb///5v+araqb5s/ZbL/1vbcD3S2A9gVMW92x514PbyTdGfh/p/qn/ndiMuKSrV85tnnZf9+457Rr5HT1vf8v9L4HCTZj3MaIfQm4zfs93776uZcNhoH+O66Ve61///RlYOie0ex9Yvxv5
   </data>
  </layer>
  <objectgroup id="6" name="road">
-  <object id="6" name="basic_road" x="0" y="432.372" width="2046.96" height="78.1189"/>
+  <object id="6" name="basic_road" x="0" y="432.372" width="927.143" height="78.1189"/>
+  <object id="19" name="basic_road" x="1007.82" y="431.518" width="1038.85" height="79.8159"/>
+  <object id="39" x="1055.74" y="0" width="15.865" height="367.058"/>
  </objectgroup>
  <objectgroup id="7" name="tower">
   <object id="10" name="tower1" x="639.902" y="399.6" width="31.5568" height="32"/>
@@ -24,38 +31,47 @@
   </properties>
   <object id="12" type="common" x="464" y="352" width="16.01" height="16">
    <properties>
-   <property name="type" type="int" value="1"/>
     <property name="breakable" type="bool" value="true"/>
     <property name="hasMoney" type="bool" value="false"/>
+    <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="14" name="money" type="money" x="496" y="352" width="16.01" height="16">
    <properties>
-    <property name="type" type="int" value="2"/>
     <property name="breakable" type="bool" value="false"/>
     <property name="hasMoney" type="bool" value="true"/>
+    <property name="type" type="int" value="2"/>
    </properties>
   </object>
   <object id="16" type="common" x="480" y="352" width="16.01" height="16">
    <properties>
-    <property name="type" type="int" value="1"/>
     <property name="breakable" type="bool" value="true"/>
     <property name="hasMoney" type="bool" value="false"/>
+    <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="17" type="common" x="528" y="352" width="16.01" height="16">
    <properties>
-    <property name="type" type="int" value="1"/>
     <property name="breakable" type="bool" value="true"/>
     <property name="hasMoney" type="bool" value="false"/>
+    <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="18" type="common" x="512" y="352" width="16" height="16">
    <properties>
-    <property name="type" type="int" value="1"/>
     <property name="breakable" type="bool" value="true"/>
     <property name="hasMoney" type="bool" value="false"/>
+    <property name="type" type="int" value="1"/>
    </properties>
   </object>
+  <object id="34" gid="18" x="368" y="368" width="16" height="16"/>
+  <object id="35" gid="18" x="400" y="368" width="16" height="16"/>
+  <object id="36" gid="18" x="384" y="368" width="16" height="16"/>
  </objectgroup>
+ <group id="9" name="enimies">
+  <objectgroup id="12" name="goomba">
+   <object id="43" gid="975" x="607.543" y="432.233" width="16" height="16"/>
+   <object id="44" gid="975" x="704.819" y="432.233" width="16" height="16"/>
+  </objectgroup>
+ </group>
 </map>

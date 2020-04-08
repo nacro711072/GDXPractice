@@ -11,7 +11,11 @@
 * Mario 人物動畫
 * 基本架構
 
-## future target
 ### 0.0.2
+* 加入栗寶寶, Mairo 可以踩他們, 也會被撞死~
+* 修正mario 卡在磚塊上的情況
+
+## future target
+### 0.0.3
 * 完善地圖
-* 加入栗寶寶, 與 Mairo 交互
+* 增加香菇元素, 讓 Mario 可以成長

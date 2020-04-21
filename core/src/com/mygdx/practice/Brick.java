@@ -4,6 +4,7 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
@@ -22,6 +23,8 @@ public class Brick {
     private Body body;
     private BrickData brickData;
     private TiledMapTileLayer.Cell cell;
+
+    private Boolean hasInvokeMarioHitEvent = false;
 
     public Brick(World world, RectangleMapObject mapObj, TiledMapTileLayer.Cell cell, ZoomHelper zh) {
         brickData = new BrickData(mapObj.getProperties());
@@ -71,11 +74,6 @@ public class Brick {
             }
             fixture.setUserData(new FixtureUserData("brick_" + name));
         }
-//        shape2.set();
-//        shape2.setAsBox(zh.scalePixel(rect.getWidth() / 2), zh.scalePixel(rect.getHeight() / 2));
-
-
-//        fixture.setUserData(brickData);
     }
 
     private void setTile(TiledMapTile tile) {
@@ -87,15 +85,29 @@ public class Brick {
 
     public void preRender(MarioBodyState marioBodyState, PreRenderCallback callback) {
 //        Gdx.app.log("test", "isMarioHitBrick: " + brickData.isMarioHitBrick());
-        if (!marioBodyState.isSmallState()) {
-            if (brickData != null && brickData.isMarioHitBrick()) {
-                if (brickData.isBreakable()) {
-                    setTile(null);
-                    return;
-                }
+        if (marioBodyState.isSmallState()) {
+            if (brickData.getProperties().get("type", Integer.class) != 2) {
+                return;
+            }
+        }
 
-                Integer type = brickData.getProperties().get("type", Integer.class);
-                setTile(callback.getMapTileWithType(type));
+        if (brickData != null && brickData.isMarioHitBrick() && !hasInvokeMarioHitEvent) {
+            hasInvokeMarioHitEvent = true;
+            if (brickData.isBreakable()) {
+                setTile(null);
+                return;
+            }
+
+            Integer type = brickData.getProperties().get("type", Integer.class);
+            setTile(callback.getMapTileWithType(type));
+
+            if (brickData.getProperties().containsKey("prop")) {
+
+                String prop = brickData.getProperties().get("prop", String.class);
+                if (prop.equals("growing_up")) {
+                    Vector2 p = body.getPosition();
+                    callback.createMushroom(p);
+                }
             }
         }
 
@@ -103,6 +115,7 @@ public class Brick {
 
     public interface PreRenderCallback {
         TiledMapTile getMapTileWithType(int type);
+        void createMushroom(Vector2 position);
     }
 
 }

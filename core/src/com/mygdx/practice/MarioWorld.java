@@ -49,8 +49,10 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
     private Rectangle cameraBound;
     private List<Character> characters = new LinkedList<>();
     private List<Brick> bricks = new LinkedList<>();
+    private List<Mushroom> mushrooms = new LinkedList<>();
 //    private MultiContactListener contactListeners = new MultiContactListener();
     private Texture enemiesTexture = new Texture("map/mario_enemies_bosses_sheet.png");
+    private Texture objectTexture = new Texture("map/items_objects_and_npcs.png");
 
 
     MarioWorld(World world, ZoomHelper zoomHelper, String path, SpriteBatch spriteBatch) {
@@ -151,7 +153,17 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
                 public TiledMapTile getMapTileWithType(int type) {
                     return map.getTile(MarioMapWrapper.TileId.EMPTY_PROPS_BRICK);
                 }
+
+                @Override
+                public void createMushroom(Vector2 position) {
+                    mushrooms.add(new Mushroom(world, objectTexture, position, zh));
+
+                }
             });
+        }
+
+        for (Mushroom mushroom: mushrooms) {
+            mushroom.preRender(zh);
         }
 
     }
@@ -167,6 +179,11 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         for (Character character : characters) {
             character.render(camera, zh, spriteBatch);
         }
+
+        for (Mushroom mushroom: mushrooms) {
+            mushroom.render(camera, zh, spriteBatch);
+        }
+
     }
 
     @Override

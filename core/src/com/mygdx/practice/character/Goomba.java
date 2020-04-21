@@ -72,12 +72,12 @@ public class Goomba implements Character {
 
         fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
-        fixture.setUserData(new FixtureUserData("monster_face"));
+        fixture.setUserData(new FixtureUserData("face"));
 
         edgeShape.set(-0.18f, -0.09f, -0.18f, 0.09f);
         fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
-        fixture.setUserData(new FixtureUserData("monster_face"));
+        fixture.setUserData(new FixtureUserData("face"));
     }
 
     @Override
@@ -99,7 +99,7 @@ public class Goomba implements Character {
         if (!bodyData.getLifeState().isAlive()) {
             body.setLinearVelocity(new Vector2(0, 0));
             bodyData.addDyingCountIfDying();
-        } else if (bodyData.faceRight) {
+        } else if (bodyData.isFaceRight()) {
             body.setLinearVelocity(new Vector2(0.1f, 0));
         } else {
             body.setLinearVelocity(new Vector2(-0.1f, 0));
@@ -113,9 +113,9 @@ public class Goomba implements Character {
         spriteBatch.begin();
 
         Vector2 p = body.getPosition();
-        float w = zh.scalePixel(deadTexture.getRegionWidth()) * (bodyData.faceRight ? 1 : -1);
+        float w = zh.scalePixel(deadTexture.getRegionWidth()) * (bodyData.isFaceRight() ? 1 : -1);
         float h = zh.scalePixel(deadTexture.getRegionHeight());
-        float x = p.x - (bodyData.faceRight ? 1 : -1) * zh.scalePixel(deadTexture.getRegionWidth()) / 2f;
+        float x = p.x - (bodyData.isFaceRight() ? 1 : -1) * zh.scalePixel(deadTexture.getRegionWidth()) / 2f;
         float y = p.y - zh.scalePixel(deadTexture.getRegionHeight()) / 2f;
 
         if (bodyData.getLifeState().isDying()) {

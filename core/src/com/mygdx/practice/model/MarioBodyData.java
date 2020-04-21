@@ -1,6 +1,12 @@
 package com.mygdx.practice.model;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.Filter;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.mygdx.practice.Config;
+import com.mygdx.practice.character.Goomba;
 
 public class MarioBodyData implements CharacterLifeState {
     public boolean faceRight = true; // false: 左, true: 右
@@ -54,9 +60,26 @@ public class MarioBodyData implements CharacterLifeState {
         }
     }
 
-    public void onEnemyContact() {
-        if (marioBodyState.isSmallState()) {
-            goDie();
+    public void onContact(InteractiveWithMario interactiveObject, Body marioBody) {
+        switch (interactiveObject.getWho()) {
+            case Goomba: {
+                if (marioBodyState.isSmallState()) {
+                    marioBody.setLinearVelocity(new Vector2(0, 0));
+
+                    for (Fixture f : marioBody.getFixtureList()) {
+                        Filter filter = f.getFilterData();
+                        filter.groupIndex = Config.FILER_DATA_ENEMY;
+                        f.setFilterData(filter);
+                    }
+
+                    goDie();
+                }
+                break;
+            }
+            case Mushroom: {
+                Gdx.app.log("mario", "onContact with mushroom");
+                break;
+            }
         }
     }
 

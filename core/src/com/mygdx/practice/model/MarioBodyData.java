@@ -6,7 +6,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.mygdx.practice.Config;
-import com.mygdx.practice.character.Goomba;
 
 public class MarioBodyData implements CharacterLifeState {
     public boolean faceRight = true; // false: 左, true: 右
@@ -73,13 +72,26 @@ public class MarioBodyData implements CharacterLifeState {
                     }
 
                     goDie();
+                } else if (marioBodyState.isBigState()) {
+                    marioBody.setLinearVelocity(new Vector2(0, 0));
+                    changeMarioBodyState(false);
                 }
                 break;
             }
             case Mushroom: {
+                changeMarioBodyState(true);
                 Gdx.app.log("mario", "onContact with mushroom");
                 break;
             }
+        }
+        interactiveObject.onContactMario();
+    }
+
+    private void changeMarioBodyState(boolean up) {
+        if (up) {
+            marioBodyState = marioBodyState.getNextState();
+        } else {
+            marioBodyState = marioBodyState.getPreState();
         }
     }
 

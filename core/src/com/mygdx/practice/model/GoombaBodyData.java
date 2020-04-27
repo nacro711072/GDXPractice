@@ -47,4 +47,9 @@ public class GoombaBodyData implements CharacterLifeState, FaceState, Interactiv
     public Who getWho() {
         return Who.Goomba;
     }
+
+    @Override
+    public void onContactMario() {
+        return; //nothing
+    }
 }

@@ -143,7 +143,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
 
         if (mario.getBody() != null && mario.getLifeState().isAlive()) {
             CameraHelper.lookAt(camera, mario.getBody().getPosition(), panRange, cameraBound);
-            mario.preRender();
+            mario.preRender(zh);
         }
 
         for (Brick brick: bricks) {
@@ -162,10 +162,17 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             });
         }
 
-        for (Mushroom mushroom: mushrooms) {
-            mushroom.preRender(zh);
+        Iterator<Mushroom> mushroomIterator = mushrooms.iterator();
+        while (mushroomIterator.hasNext()) {
+            Mushroom mushroom = mushroomIterator.next();
+            Body body = mushroom.getBodyIfNeedDestroy();
+            if (body != null) {
+                world.destroyBody(body);
+                mushroomIterator.remove();
+            } else {
+                mushroom.preRender(zh);
+            }
         }
-
     }
 
     public void render(OrthographicCamera camera, SpriteBatch spriteBatch) {

@@ -86,11 +86,6 @@ public class Goomba implements Character {
     }
 
     @Override
-    public List<Fixture> getFixtures() {
-        return fixtures;
-    }
-
-    @Override
     public void render(Camera camera, ZoomHelper zh, SpriteBatch spriteBatch) {
         if (bodyData == null) return;
 

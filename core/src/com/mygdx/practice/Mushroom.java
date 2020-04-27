@@ -29,7 +29,6 @@ public class Mushroom {
 
     private TextureRegion texture;
 
-
     private boolean arise = true;
     private int ariseIteration = 0;
     private int ariseIterationLimit = 10;
@@ -115,5 +114,9 @@ public class Mushroom {
 
         spriteBatch.end();
 
+    }
+
+    public Body getBodyIfNeedDestroy() {
+        return bodyData.hasEat ? body : null;
     }
 }

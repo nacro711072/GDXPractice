@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.practice.character.Character;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.model.FixtureUserData;
@@ -30,25 +31,13 @@ public class Mario implements Character,
     private MarioBodyData bodyData = new MarioBodyData();
     private MarioFootData footUserData;
     private MarioDeadAnimation marioDeadAnimation;
-    private List<Fixture> fixtures;
+    private Fixture mainFixture;
 
     private MarioTextureRepository marioTextureRepository = new MarioTextureRepository("mario_sheet.png");
 
     private float animationState = 0.1f;
 
     public Mario(World world, ZoomHelper zh) {
-
-        float halfX = zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) / 2;
-        float halfY = zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState())) / 2;
-
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(halfX, halfY);
-
-        FixtureDef fdef = new FixtureDef();
-        fdef.shape = shape;
-        fdef.density = 1f;
-        fdef.friction = 0f;
-
         BodyDef bodyDef = new BodyDef();
         bodyDef.linearDamping = 0.1f;
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -58,8 +47,24 @@ public class Mario implements Character,
         body = world.createBody(bodyDef);
         body.setUserData(bodyData);
 
-        Fixture marioBodyF = body.createFixture(fdef);
-        marioBodyF.setUserData(new FixtureUserData("mario_body"));
+        createFixtures(zh);
+    }
+
+    public void createFixtures(ZoomHelper zh) {
+        MarioBodyState state = getMarioBodyState();
+        float halfX = zh.scalePixel(marioTextureRepository.getWidth(state)) / 2;
+        float halfY = zh.scalePixel(marioTextureRepository.getHeight(state)) / 2;
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(halfX, halfY);
+
+        FixtureDef fdef = new FixtureDef();
+        fdef.shape = shape;
+        fdef.density = state.isSmallState() ? 1f : 0.5f;
+        fdef.friction = 0f;
+
+        mainFixture = body.createFixture(fdef);
+        mainFixture.setUserData(new FixtureUserData("mario_body"));
 
         shape.setAsBox(halfX, 0.001f, new Vector2(0, -halfY), 0);
         fdef.shape = shape;
@@ -80,13 +85,27 @@ public class Mario implements Character,
         return body;
     }
 
-    @Override
-    public List<Fixture> getFixtures() {
-        return fixtures;
-    }
-
-    public void preRender() {
+    public void preRender(ZoomHelper zh) {
         if (bodyData == null || body == null || !getLifeState().isAlive()) return;
+
+        if (getMarioBodyState().isBigState() && mainFixture.getDensity() != 0.5f) {
+            Array<Fixture> fixtures = body.getFixtureList();
+            for (Fixture f: fixtures) {
+                body.destroyFixture(f);
+            }
+
+            createFixtures(zh);
+        }
+
+        if (getMarioBodyState().isSmallState() && mainFixture.getDensity() != 1f) {
+            Array<Fixture> fixtures = body.getFixtureList();
+            for (Fixture f: fixtures) {
+                body.destroyFixture(f);
+            }
+
+            createFixtures(zh);
+        }
+
 
         if (footUserData.hasContactTarget() &&
                 (bodyData.getState() == MarioActionState.JUMP || bodyData.getState() == MarioActionState.FALLING) &&
@@ -119,7 +138,6 @@ public class Mario implements Character,
 
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-
 
         TextureRegion textureRegion;
         if (getLifeState().isDying()) {

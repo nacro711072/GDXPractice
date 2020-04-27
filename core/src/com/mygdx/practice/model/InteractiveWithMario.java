@@ -6,6 +6,7 @@ package com.mygdx.practice.model;
 public interface InteractiveWithMario {
 
     Who getWho();
+    void onContactMario();
 
     enum Who {
         Goomba, Mushroom;

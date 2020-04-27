@@ -1,12 +1,10 @@
 package com.mygdx.practice;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -14,7 +12,6 @@ import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.CharacterLifeState;
 import com.mygdx.practice.model.FaceState;
 import com.mygdx.practice.model.FixtureUserData;
-import com.mygdx.practice.model.GoombaBodyData;
 import com.mygdx.practice.model.InteractiveWithMario;
 import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioFootData;
@@ -48,9 +45,6 @@ public class WorldContact implements ContactListener {
 
         if (dataA != null && dataA.type.equals("face")) {
             Object bodyData = fixtureA.getBody().getUserData();
-            if (bodyData instanceof MushroomBodyData) {
-                Gdx.app.log("mushroom", "is mushroom contact");
-            }
 
             if (bodyData instanceof InteractiveWithMario && dataB != null && dataB.type.equals("mario_body")) {
                 MarioBodyData marioBodyData = (MarioBodyData) bodyB.getUserData();

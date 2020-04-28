@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -38,7 +39,9 @@ public class Goomba implements Character {
     private GoombaBodyData bodyData;
     private List<Fixture> fixtures = new ArrayList<>();
 
-    public Goomba(World world, Texture texture, Vector2 position) {
+    public Goomba(World world, Texture texture, TiledMapTileMapObject tileMapObject, ZoomHelper zh) {
+        Vector2 position = new Vector2(zh.scalePixel(tileMapObject.getX()), zh.scalePixel(tileMapObject.getY()));
+
         deadTexture = new TextureRegion(texture, 16 * 2, 16, 16, 16);
         Array<TextureRegion> tempFrame = new Array<>();
         for (int i = 0; i < 2; ++i) {
@@ -54,7 +57,7 @@ public class Goomba implements Character {
 
         body = world.createBody(bodyDef);
 
-        bodyData = new GoombaBodyData();
+        bodyData = new GoombaBodyData(zh.scalePixel(16), zh.scalePixel(16));
         body.setUserData(bodyData);
 
         PolygonShape shape = new PolygonShape();
@@ -72,22 +75,17 @@ public class Goomba implements Character {
 
         fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
-        fixture.setUserData(new FixtureUserData("monster_face"));
+        fixture.setUserData(new FixtureUserData("face"));
 
         edgeShape.set(-0.18f, -0.09f, -0.18f, 0.09f);
         fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
-        fixture.setUserData(new FixtureUserData("monster_face"));
+        fixture.setUserData(new FixtureUserData("face"));
     }
 
     @Override
     public Body getBody() {
         return body;
-    }
-
-    @Override
-    public List<Fixture> getFixtures() {
-        return fixtures;
     }
 
     @Override
@@ -99,7 +97,7 @@ public class Goomba implements Character {
         if (!bodyData.getLifeState().isAlive()) {
             body.setLinearVelocity(new Vector2(0, 0));
             bodyData.addDyingCountIfDying();
-        } else if (bodyData.faceRight) {
+        } else if (bodyData.isFaceRight()) {
             body.setLinearVelocity(new Vector2(0.1f, 0));
         } else {
             body.setLinearVelocity(new Vector2(-0.1f, 0));
@@ -113,9 +111,9 @@ public class Goomba implements Character {
         spriteBatch.begin();
 
         Vector2 p = body.getPosition();
-        float w = zh.scalePixel(deadTexture.getRegionWidth()) * (bodyData.faceRight ? 1 : -1);
+        float w = zh.scalePixel(deadTexture.getRegionWidth()) * (bodyData.isFaceRight() ? 1 : -1);
         float h = zh.scalePixel(deadTexture.getRegionHeight());
-        float x = p.x - (bodyData.faceRight ? 1 : -1) * zh.scalePixel(deadTexture.getRegionWidth()) / 2f;
+        float x = p.x - (bodyData.isFaceRight() ? 1 : -1) * zh.scalePixel(deadTexture.getRegionWidth()) / 2f;
         float y = p.y - zh.scalePixel(deadTexture.getRegionHeight()) / 2f;
 
         if (bodyData.getLifeState().isDying()) {

@@ -1,15 +1,20 @@
 package com.mygdx.practice.character.mario;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
+import com.mygdx.practice.Config;
+import com.mygdx.practice.SimpleCounter;
 import com.mygdx.practice.character.Character;
 import com.mygdx.practice.component.UserController;
 import com.mygdx.practice.model.FixtureUserData;
@@ -17,6 +22,7 @@ import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioBodyState;
 import com.mygdx.practice.model.MarioFootData;
 import com.mygdx.practice.model.MarioActionState;
+import com.mygdx.practice.model.MarioMainFixtureData;
 import com.mygdx.practice.util.ZoomHelper;
 
 import java.util.List;
@@ -24,30 +30,22 @@ import java.util.List;
 /**
  * Nick, 2020-02-13
  */
-public class Mario implements Character,
-        UserController.TouchListener {
-    private Body body;
-    private MarioBodyData bodyData = new MarioBodyData();
-    private MarioFootData footUserData;
-    private MarioDeadAnimation marioDeadAnimation;
-    private List<Fixture> fixtures;
+public class Mario implements Character, UserController.TouchListener, SimpleCounter.Callback {
 
     private MarioTextureRepository marioTextureRepository = new MarioTextureRepository("mario_sheet.png");
 
+    private Body body;
+    private MarioBodyData bodyData;
+    private MarioFootData footUserData;
+    private MarioDeadAnimation marioDeadAnimation;
+    private Fixture mainFixture;
+
     private float animationState = 0.1f;
 
+    private SimpleCounter invincibleCounter = new SimpleCounter(120, this);
+
     public Mario(World world, ZoomHelper zh) {
-
-        float halfX = zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) / 2;
-        float halfY = zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState())) / 2;
-
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(halfX, halfY);
-
-        FixtureDef fdef = new FixtureDef();
-        fdef.shape = shape;
-        fdef.density = 1f;
-        fdef.friction = 0f;
+        bodyData = new MarioBodyData(marioTextureRepository, zh);
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.linearDamping = 0.1f;
@@ -58,8 +56,36 @@ public class Mario implements Character,
         body = world.createBody(bodyDef);
         body.setUserData(bodyData);
 
-        Fixture marioBodyF = body.createFixture(fdef);
-        marioBodyF.setUserData(new FixtureUserData("mario_body"));
+        createFixtures();
+    }
+
+    public void createFixtures() {
+        short filterGroup = bodyData.invincible ? Config.FILER_DATA_ENEMY : 0;
+        Array<Fixture> fixtures = body.getFixtureList();
+
+        Gdx.app.log("mario", "fixture list size: " + fixtures.size);
+        if (fixtures.size != 0) {
+            for (Fixture f: fixtures) {
+                body.destroyFixture(f);
+            }
+            createFixtures();
+            return;
+        }
+        MarioBodyState state = getMarioBodyState();
+        float halfX = bodyData.getBodyWidth() / 2;
+        float halfY = bodyData.getBodyHeight() / 2;
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(halfX, halfY);
+
+        FixtureDef fdef = new FixtureDef();
+        fdef.shape = shape;
+        fdef.density = state.isSmallState() ? 1f : 0.5f;
+        fdef.friction = 0f;
+        fdef.filter.groupIndex = filterGroup;
+
+        mainFixture = body.createFixture(fdef);
+        mainFixture.setUserData(new MarioMainFixtureData(state));
 
         shape.setAsBox(halfX, 0.001f, new Vector2(0, -halfY), 0);
         fdef.shape = shape;
@@ -80,13 +106,21 @@ public class Mario implements Character,
         return body;
     }
 
-    @Override
-    public List<Fixture> getFixtures() {
-        return fixtures;
-    }
-
-    public void preRender() {
+    public void preRender(ZoomHelper zh) {
         if (bodyData == null || body == null || !getLifeState().isAlive()) return;
+
+        if (bodyData.invincible) {
+            invincibleCounter.count();
+        }
+
+        if (getMarioBodyState() != ((MarioMainFixtureData) mainFixture.getUserData()).getBodyState()) {
+            Array<Fixture> fixtures = body.getFixtureList();
+            for (Fixture f: fixtures) {
+                body.destroyFixture(f);
+            }
+
+            createFixtures();
+        }
 
         if (footUserData.hasContactTarget() &&
                 (bodyData.getState() == MarioActionState.JUMP || bodyData.getState() == MarioActionState.FALLING) &&
@@ -112,14 +146,13 @@ public class Mario implements Character,
         animationState = (bodyData.getState() == bodyData.getPreState() ? animationState + 0.1f : 0.1f);
 
         Vector2 p = body.getPosition();
-        float w = zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) * (bodyData.faceRight ? 1 : -1);
-        float h = zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState()));
-        float x = p.x - (bodyData.faceRight ? 1 : -1) * zh.scalePixel(marioTextureRepository.getWidth(getMarioBodyState())) / 2f;
-        float y = p.y - zh.scalePixel(marioTextureRepository.getHeight(getMarioBodyState())) / 2f;
+        float w = bodyData.getBodyWidth() * (bodyData.faceRight ? 1 : -1);
+        float h = bodyData.getBodyHeight();
+        float x = p.x - (bodyData.faceRight ? 1 : -1) * bodyData.getBodyWidth() / 2f;
+        float y = p.y - bodyData.getBodyHeight() / 2f;
 
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-
 
         TextureRegion textureRegion;
         if (getLifeState().isDying()) {
@@ -197,7 +230,7 @@ public class Mario implements Character,
 
         MarioActionState marioActionState = bodyData.getState();
         if (marioActionState != MarioActionState.JUMP && marioActionState != MarioActionState.FALLING) {
-            body.applyLinearImpulse(new Vector2(0, 0.3f), body.getWorldCenter(), true);
+            body.applyLinearImpulse(new Vector2(0, 0.275f), body.getWorldCenter(), true);
         }
     }
 
@@ -222,5 +255,19 @@ public class Mario implements Character,
 
     public MarioBodyState getMarioBodyState() {
         return bodyData.getMarioBodyState();
+    }
+
+    @Override
+    public void onFinish() {
+        Gdx.app.log("mario", "counter finish");
+        bodyData.invincible = false;
+        invincibleCounter.reset();
+
+        for (Fixture f : body.getFixtureList()) {
+            Filter filter = f.getFilterData();
+            filter.groupIndex = 0;
+            f.setFilterData(filter);
+        }
+
     }
 }

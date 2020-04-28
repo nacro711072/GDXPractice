@@ -14,7 +14,6 @@ import java.util.List;
  */
 public interface Character extends CharacterLifeState {
     Body getBody();
-    List<Fixture> getFixtures();
 
     void render(Camera camera, ZoomHelper zh, SpriteBatch spriteBatch);
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="128" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="45">
+<map version="1.2" tiledversion="1.3.4" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="128" height="32" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="45">
  <tileset firstgid="1" name="NES - Super Mario Bros - Tileset" tilewidth="16" tileheight="16" tilecount="924" columns="33">
   <image source="NES - Super Mario Bros - Tileset.png" width="528" height="448"/>
  </tileset>
@@ -40,6 +40,7 @@
    <properties>
     <property name="breakable" type="bool" value="false"/>
     <property name="hasMoney" type="bool" value="true"/>
+    <property name="prop" value="growing_up"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>

@@ -4,17 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
-import com.badlogic.gdx.physics.box2d.ContactFilter;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.mygdx.practice.model.BodyData;
 import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.CharacterLifeState;
+import com.mygdx.practice.model.FaceState;
 import com.mygdx.practice.model.FixtureUserData;
-import com.mygdx.practice.model.GoombaBodyData;
+import com.mygdx.practice.model.InteractiveWithMario;
 import com.mygdx.practice.model.MarioBodyData;
 import com.mygdx.practice.model.MarioFootData;
 
@@ -40,31 +40,29 @@ public class WorldContact implements ContactListener {
     }
 
     private void checkGoombaEvent(Fixture fixtureA, Fixture fixtureB) {
-        if (fixtureA == null || fixtureB == null) return;
+        if (fixtureA == null) return;
         FixtureUserData dataA = (FixtureUserData) fixtureA.getUserData();
         FixtureUserData dataB = (FixtureUserData) fixtureB.getUserData();
         Body bodyB = fixtureB.getBody();
 
-        if (dataA != null && dataA.type.equals("monster_face")) {
-            GoombaBodyData bodyData = (GoombaBodyData) fixtureA.getBody().getUserData();
+        if (dataA != null && dataA.type.equals("face")) {
+            Object bodyData = fixtureA.getBody().getUserData();
 
-            if (dataB != null && dataB.type.equals("mario_body")) {
-                if (bodyData != null &&
-                        bodyData.getLifeState().isAlive()) {
-                    ((MarioBodyData) bodyB.getUserData()).onEnemyContact();
-                    bodyB.setLinearVelocity(new Vector2(0, 0));
-
-                    for (Fixture f : bodyB.getFixtureList()) {
-                        Filter filter = f.getFilterData();
-                        filter.groupIndex = Config.FILER_DATA_ENEMY;
-                        f.setFilterData(filter);
-                    }
+            if (bodyData instanceof InteractiveWithMario && dataB != null && dataB.type.equals("mario_body")) {
+                MarioBodyData marioBodyData = (MarioBodyData) bodyB.getUserData();
+                if (!(bodyData instanceof CharacterLifeState) || ((CharacterLifeState) bodyData).getLifeState().isAlive()) {
+                    marioBodyData.onContact((InteractiveWithMario) bodyData, bodyB);
                 }
-            } else {
-                bodyData.faceRight = !bodyData.faceRight;
+            } else if (bodyData instanceof FaceState){
+                checkFaceEvent((FaceState) bodyData);
             }
         }
 
+    }
+
+    private void checkFaceEvent(FaceState faceState) {
+        if (faceState == null) return;
+        faceState.changeFaceDirection();
     }
 
     private void checkMarioStampEvent(Fixture fixtureA, Fixture fixtureB) {
@@ -79,16 +77,24 @@ public class WorldContact implements ContactListener {
 
         Body marioBody = fixtureA.getBody();
         Body otherBody = fixtureB.getBody();
+        Object bodyUserData = otherBody.getUserData();
+//        float halfH = 0f;
+//        if (bodyUserData instanceof BodyData) {
+//            halfH = ((BodyData) bodyUserData).getBodyHeight() / 2;
+//        }
 
         float marioBottom = marioBody.getPosition().y + temp.y;
         float otherY = otherBody.getPosition().y;
+        Gdx.app.log("contact", String.format("y of (body, foot, other): (%s, %s, %s)", marioBody.getPosition().y, temp.y, otherY));
 
         if (marioBottom > otherY) {
             ((MarioFootData) dataA).addContact((FixtureUserData) fixtureB.getUserData());
-            Object bodyUserData = otherBody.getUserData();
+
             if (bodyUserData instanceof CharacterLifeState) {
                 ((CharacterLifeState) bodyUserData).changeState(CharacterLifeState.LifeState.DYING);
-                marioBody.setLinearVelocity(new Vector2(0, 0.5f));
+
+                Vector2 velocity = marioBody.getLinearVelocity().add(0, 0.5f);
+                marioBody.setLinearVelocity(velocity);
             }
         }
 
@@ -146,9 +152,9 @@ public class WorldContact implements ContactListener {
 
     private void checkBrickContactEvent(Fixture fixtureA, Fixture fixtureB, boolean isContact) {
         if (fixtureA == null || fixtureB == null) return;
-        if (((FixtureUserData) fixtureA.getUserData()).type.contains("brick")) {
-            Gdx.app.log("test", "type name: " + ((FixtureUserData) fixtureA.getUserData()).type);
-        }
+//        if (((FixtureUserData) fixtureA.getUserData()).type.contains("brick")) {
+//            Gdx.app.log("test", "type name: " + ((FixtureUserData) fixtureA.getUserData()).type);
+//        }
 
         if (((FixtureUserData) fixtureA.getUserData()).type.equals("brick_b")) {
             BrickData dataA = (BrickData) fixtureA.getBody().getUserData();

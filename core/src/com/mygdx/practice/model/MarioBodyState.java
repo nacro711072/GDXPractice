@@ -11,4 +11,25 @@ public enum MarioBodyState {
         return this == bigMario;
     }
 
+    public MarioBodyState getNextState() {
+        switch (this) {
+            case smallMario:
+                return bigMario;
+            case bigMario:
+            case superMario:
+                return superMario;
+        }
+        return null;
+    }
+
+    public MarioBodyState getPreState() {
+        switch (this) {
+            case smallMario:
+            case bigMario:
+                return smallMario;
+            case superMario:
+                return bigMario;
+        }
+        return null;
+    }
 }

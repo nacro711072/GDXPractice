@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -38,7 +39,9 @@ public class Goomba implements Character {
     private GoombaBodyData bodyData;
     private List<Fixture> fixtures = new ArrayList<>();
 
-    public Goomba(World world, Texture texture, Vector2 position) {
+    public Goomba(World world, Texture texture, TiledMapTileMapObject tileMapObject, ZoomHelper zh) {
+        Vector2 position = new Vector2(zh.scalePixel(tileMapObject.getX()), zh.scalePixel(tileMapObject.getY()));
+
         deadTexture = new TextureRegion(texture, 16 * 2, 16, 16, 16);
         Array<TextureRegion> tempFrame = new Array<>();
         for (int i = 0; i < 2; ++i) {
@@ -54,7 +57,7 @@ public class Goomba implements Character {
 
         body = world.createBody(bodyDef);
 
-        bodyData = new GoombaBodyData();
+        bodyData = new GoombaBodyData(zh.scalePixel(16), zh.scalePixel(16));
         body.setUserData(bodyData);
 
         PolygonShape shape = new PolygonShape();

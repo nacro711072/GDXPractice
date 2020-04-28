@@ -22,7 +22,7 @@ import com.mygdx.practice.util.ZoomHelper;
 public class Mushroom {
 
     private Body body;
-    private MushroomBodyData bodyData = new MushroomBodyData();
+    private MushroomBodyData bodyData;
 
     private Fixture fixture;
     private FixtureDef fixtureDef;
@@ -38,6 +38,7 @@ public class Mushroom {
     public Mushroom(World world, Texture texture, Vector2 position, ZoomHelper zh) {
         this.texture = new TextureRegion(texture, 0, 0, 16 ,16);
         boxRadius = zh.scalePixel(16) / 2;
+        bodyData = new MushroomBodyData(zh.scalePixel(16), zh.scalePixel(16));
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;

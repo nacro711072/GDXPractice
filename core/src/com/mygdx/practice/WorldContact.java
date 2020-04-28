@@ -1,5 +1,6 @@
 package com.mygdx.practice;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -8,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.mygdx.practice.model.BodyData;
 import com.mygdx.practice.model.BrickData;
 import com.mygdx.practice.model.CharacterLifeState;
 import com.mygdx.practice.model.FaceState;
@@ -75,16 +77,24 @@ public class WorldContact implements ContactListener {
 
         Body marioBody = fixtureA.getBody();
         Body otherBody = fixtureB.getBody();
+        Object bodyUserData = otherBody.getUserData();
+//        float halfH = 0f;
+//        if (bodyUserData instanceof BodyData) {
+//            halfH = ((BodyData) bodyUserData).getBodyHeight() / 2;
+//        }
 
         float marioBottom = marioBody.getPosition().y + temp.y;
         float otherY = otherBody.getPosition().y;
+        Gdx.app.log("contact", String.format("y of (body, foot, other): (%s, %s, %s)", marioBody.getPosition().y, temp.y, otherY));
 
         if (marioBottom > otherY) {
             ((MarioFootData) dataA).addContact((FixtureUserData) fixtureB.getUserData());
-            Object bodyUserData = otherBody.getUserData();
+
             if (bodyUserData instanceof CharacterLifeState) {
                 ((CharacterLifeState) bodyUserData).changeState(CharacterLifeState.LifeState.DYING);
-                marioBody.setLinearVelocity(new Vector2(0, 0.5f));
+
+                Vector2 velocity = marioBody.getLinearVelocity().add(0, 0.5f);
+                marioBody.setLinearVelocity(velocity);
             }
         }
 

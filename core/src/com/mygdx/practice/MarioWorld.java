@@ -1,9 +1,12 @@
 package com.mygdx.practice;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapGroupLayer;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -54,6 +57,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
     private Texture enemiesTexture = new Texture("map/mario_enemies_bosses_sheet.png");
     private Texture objectTexture = new Texture("map/items_objects_and_npcs.png");
 
+//    ShapeRenderer testRender = new ShapeRenderer();
 
     MarioWorld(World world, ZoomHelper zoomHelper, String path, SpriteBatch spriteBatch) {
         this.world = world;
@@ -122,7 +126,7 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
         }
 
         for (TiledMapTileMapObject tileMapObject : ((MapGroupLayer) map.getLayers().get(5)).getLayers().get(0).getObjects().getByType(TiledMapTileMapObject.class)) {
-            Goomba testGoomba = new Goomba(world, enemiesTexture, new Vector2(zh.scalePixel(tileMapObject.getX()), zh.scalePixel(tileMapObject.getY())));
+            Goomba testGoomba = new Goomba(world, enemiesTexture, tileMapObject, zh);
             characters.add(testGoomba);
 
         }
@@ -191,6 +195,16 @@ public class MarioWorld implements Disposable, UserController.TouchListener {
             mushroom.render(camera, zh, spriteBatch);
         }
 
+//        Gdx.gl.glLineWidth(1);
+//
+//        testRender.setProjectionMatrix(camera.combined);
+//        testRender.begin(ShapeRenderer.ShapeType.Line);
+//
+//        testRender.setColor(Color.RED);
+//        testRender.line(new Vector2(0, 2f), new Vector2(100, 2f));
+//        testRender.line(new Vector2(0, 2.5f), new Vector2(100, 2.5f));
+//        testRender.line(new Vector2(0, 3f), new Vector2(100, 3f));
+//        testRender.end();
     }
 
     @Override

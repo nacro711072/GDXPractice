@@ -1,6 +1,5 @@
 package com.mygdx.practice.character.mario;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.practice.model.MarioBodyState;
 
